@@ -1,0 +1,58 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.log
+*.pem
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cache/
+.parcel-cache
+.next
+out
+build
+coverage/
+.nyc_output/
+
+# Secrets and API keys
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Local testing
+test-results/
+
+# Electron build artifacts
+dist-electron/
+dist-final/
+
+# Electron build output
+dist/
+
+# Generated icons
+build/icon.png
+build/icon-*.png
+build/icon.ico
+build/icon.icns
+
+# Node modules and cache
+node_modules/
+.env.local
