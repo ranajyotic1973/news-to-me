@@ -55,15 +55,15 @@ jobs:
 
       - name: Build desktop app (Windows)
         if: runner.os == 'Windows'
-        run: npm run dist:win
+        run: npm run dist:win -- --publish never
 
       - name: Build desktop app (macOS)
         if: runner.os == 'macOS'
-        run: npm run dist:mac
+        run: npm run dist:mac -- --publish never
 
       - name: Build desktop app (Linux)
         if: runner.os == 'Linux'
-        run: npm run dist:linux
+        run: npm run dist:linux -- --publish never
 
       - name: Upload artifacts (Windows)
         if: runner.os == 'Windows'
