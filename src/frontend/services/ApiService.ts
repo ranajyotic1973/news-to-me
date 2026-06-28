@@ -1,4 +1,19 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Determine API base URL
+// In production (Electron), backend runs on localhost:3001
+// In development, use VITE_API_URL or default to localhost:5000
+const getApiBaseUrl = (): string => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Production: backend is on port 3001
+  if (!import.meta.env.DEV) {
+    return 'http://localhost:3001';
+  }
+  // Development: default to localhost:5000
+  return 'http://localhost:5000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface ApiError {
   message: string;

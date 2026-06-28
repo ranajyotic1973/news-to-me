@@ -8,6 +8,7 @@
   "files": [
     "dist/**/*",
     "dist-electron/**/*",
+    "dist-backend/**/*",
     "node_modules/**/*",
     "package.json"
   ],
@@ -16,18 +17,10 @@
   },
   "win": {
     "target": [
-      {
-        "target": "nsis",
-        "arch": ["x64"]
-      },
-      {
-        "target": "portable",
-        "arch": ["x64"]
-      }
+      "nsis",
+      "portable"
     ],
-    "icon": "build/icon.png",
-    "certificateFile": null,
-    "certificatePassword": null
+    "icon": "build/icon.png"
   },
   "nsis": {
     "oneClick": false,

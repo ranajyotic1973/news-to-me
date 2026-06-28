@@ -31,6 +31,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+// Health check endpoint
+app.get('/health', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // API routes
 app.use('/', apiRoutes);
 
@@ -48,6 +53,11 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // Start server
 app.listen(config.port, () => {
   console.log(`[${config.nodeEnv}] Server running on port ${config.port}`);
+
+  // Send ready message to parent process if running as child (Electron)
+  if (process.send) {
+    process.send({ type: 'READY', port: config.port });
+  }
 });
 
 export default app;

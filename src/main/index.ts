@@ -1,10 +1,31 @@
-import { app, BrowserWindow, Menu, ipcMain } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
 import path from 'path';
 import isDev from 'electron-is-dev';
+import open from 'open';
 import { serverManager } from './server';
 import { setupIPC } from './ipc';
 
 let mainWindow: BrowserWindow | null = null;
+
+// Launches the default system browser to display the backend-served UI.
+// This is called in production mode after the backend server is ready.
+const launchBrowserUI = async (): Promise<void> => {
+  try {
+    const url = serverManager.getUrl();
+    console.log(`Launching browser with URL: ${url}`);
+    await open(url);
+  } catch (error) {
+    console.error('Failed to open browser:', error);
+    const message =
+      error instanceof Error ? error.message : 'Unknown error occurred';
+    dialog.showErrorBox(
+      'Browser Launch Error',
+      `Could not open the News To Me application in your browser.\n\n` +
+        `Try opening this URL manually in your browser:\n${serverManager.getUrl()}\n\n` +
+        `Error: ${message}`
+    );
+  }
+};
 
 const createWindow = async (): Promise<void> => {
   mainWindow = new BrowserWindow({
@@ -16,7 +37,6 @@ const createWindow = async (): Promise<void> => {
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
-      enableRemoteModule: false,
       sandbox: true,
       nodeIntegration: false,
     },
@@ -107,9 +127,22 @@ app.on('ready', async () => {
   try {
     await serverManager.startServer();
     setupIPC();
-    await createWindow();
+
+    // Launch browser to the backend UI
+    if (!isDev) {
+      await launchBrowserUI();
+    } else {
+      // In development, create window to show dev tools
+      await createWindow();
+    }
   } catch (error) {
     console.error('Failed to start application:', error);
+    dialog.showErrorBox(
+      'Startup Error',
+      `Failed to start News To Me application:\n\n${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
     app.quit();
   }
 });

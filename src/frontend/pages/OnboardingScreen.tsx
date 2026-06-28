@@ -33,7 +33,11 @@ function OnboardingScreen({ onComplete, onConfigurationComplete }: OnboardingScr
     }
   }, []);
 
-  const handleProfileSubmit = (profile: ChildProfile): void => {
+  const handleProfileSubmit = (data: ChildProfile | Partial<LLMConfig> | string): void => {
+    if (typeof data === 'string') return;
+    if ('provider' in data) return;
+
+    const profile = data as ChildProfile;
     const errors = [
       ValidationService.validateName(profile.name),
       ValidationService.validateAge(profile.age),
@@ -50,7 +54,10 @@ function OnboardingScreen({ onComplete, onConfigurationComplete }: OnboardingScr
     setStep('llm');
   };
 
-  const handleLLMConfigSubmit = async (config: Partial<LLMConfig>): Promise<void> => {
+  const handleLLMConfigSubmit = async (data: ChildProfile | Partial<LLMConfig> | string): Promise<void> => {
+    if (typeof data === 'string' || !('provider' in data)) return;
+
+    const config = data as Partial<LLMConfig>;
     if (!config.provider || !config.apiToken) {
       setError('Provider and API token are required');
       return;
@@ -61,17 +68,17 @@ function OnboardingScreen({ onComplete, onConfigurationComplete }: OnboardingScr
 
     try {
       const { ConfigApi } = await import('../services/ApiService');
-      const data = await ConfigApi.listModels(config.provider, config.apiToken);
+      const configData = await ConfigApi.listModels(config.provider, config.apiToken);
 
       // Store all models and set default to cheapest
-      const models = data.models || [];
+      const models = configData.models || [];
       console.log('Available models:', models);
       setAvailableModels(models);
 
       setLLMConfig({
         provider: config.provider as 'openai' | 'anthropic' | 'cohere' | 'xai' | 'gemini' | 'mock',
         apiToken: config.apiToken,
-        selectedModel: data.recommended.id,
+        selectedModel: configData.recommended.id,
       });
 
       setStep('model');
@@ -84,8 +91,10 @@ function OnboardingScreen({ onComplete, onConfigurationComplete }: OnboardingScr
     }
   };
 
-  const handleModelSelection = (modelId: string): void => {
-    setLLMConfig({ ...llmConfig, selectedModel: modelId });
+  const handleModelSelection = (data: ChildProfile | Partial<LLMConfig> | string): void => {
+    if (typeof data !== 'string') return;
+
+    setLLMConfig({ ...llmConfig, selectedModel: data });
     saveConfiguration();
   };
 
