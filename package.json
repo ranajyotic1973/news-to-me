@@ -5,8 +5,10 @@
   "main": "dist-electron/main/index.js",
   "homepage": "./",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:backend\" \"npm run dev:electron\"",
+    "dev:vite": "vite",
     "dev:backend": "nodemon --exec ts-node src/backend/index.ts",
+    "dev:electron": "sleep 2 && electron . --remote-debugging-port=9223",
     "build": "npm run build:frontend && npm run build:backend:js && npm run build:electron",
     "build:frontend": "vite build",
     "build:backend:js": "tsc src/backend/index.ts --outDir dist/backend --module commonjs --target es2020 --esModuleInterop --resolveJsonModule",

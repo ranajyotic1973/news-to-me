@@ -51,6 +51,11 @@ const createWindow = async (): Promise<void> => {
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+        mainWindow?.webContents.toggleDevTools();
+      }
+    });
   }
 
   mainWindow.on('closed', () => {
@@ -131,13 +136,8 @@ app.on('ready', async () => {
     logger.info('Backend server started successfully');
     setupIPC();
 
-    // Launch browser to the backend UI
-    if (!isDev) {
-      await launchBrowserUI();
-    } else {
-      // In development, create window to show dev tools
-      await createWindow();
-    }
+    // In development and production, create Electron window
+    await createWindow();
   } catch (error) {
     logger.error('Failed to start application:', error);
 
