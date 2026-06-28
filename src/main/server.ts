@@ -1,4 +1,4 @@
-import { utilityProcess, UtilityProcess } from 'electron';
+import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import isDev from 'electron-is-dev';
 import http from 'http';
@@ -13,7 +13,7 @@ export interface ServerError {
 // Manages the backend server lifecycle within the Electron app.
 // Handles spawning, health checking, and cleanup of the Node.js backend process.
 export class ServerManager {
-  private serverProcess: UtilityProcess | null = null;
+  private serverProcess: ChildProcess | null = null;
   private serverReady = false;
   private serverPort = 3001;
   private readyCallback: (() => void) | null = null;
@@ -21,7 +21,7 @@ export class ServerManager {
   private stderrOutput: string[] = [];
 
   // Starts the backend server as a child process and waits for it to be ready.
-  // In development, runs from dist/backend/index.js; in production, from bundled executable.
+  // In development, runs from dist/backend/index.js; in production, from bundled files.
   async startServer(): Promise<void> {
     let serverPath: string;
 
@@ -35,12 +35,11 @@ export class ServerManager {
 
     logger.info(`Starting server from: ${serverPath}`);
 
-    this.serverProcess = utilityProcess.fork(serverPath, [], {
+    this.serverProcess = spawn('node', [serverPath], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...process.env,
         NODE_ENV: isDev ? 'development' : 'production',
-        ELECTRON_RUN_AS_NODE: '1',
         PORT: String(this.serverPort),
       },
     });
@@ -53,16 +52,11 @@ export class ServerManager {
       });
     }
 
-    this.serverProcess.on('message', (msg: any) => {
-      if (msg && msg.type === 'READY') {
-        this.serverReady = true;
-        logger.info(`✓ Server ready on http://localhost:${msg.port}`);
-        if (this.readyCallback) {
-          this.readyCallback();
-          this.readyCallback = null;
-        }
-      }
-    });
+    if (this.serverProcess.stdout) {
+      this.serverProcess.stdout.on('data', (data) => {
+        logger.info('Server stdout:', data.toString());
+      });
+    }
 
     this.serverProcess.on('exit', (code) => {
       logger.warn(`Server exited with code ${code}`);
@@ -151,7 +145,9 @@ export class ServerManager {
   async stopServer(): Promise<void> {
     if (this.serverProcess) {
       try {
-        this.serverProcess.kill();
+        if (!this.serverProcess.killed) {
+          this.serverProcess.kill();
+        }
         this.serverProcess = null;
         this.serverReady = false;
         logger.info('Server stopped');
