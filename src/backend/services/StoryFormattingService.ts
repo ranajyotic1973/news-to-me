@@ -13,18 +13,28 @@ export interface NewspaperPage {
 }
 
 export class StoryFormattingService {
-  static generatePlaceholderImage(category: string, index: number): string {
-    // Generate placeholder images from Picsum (Lorempicsum alternative)
-    const width = 400;
-    const height = 300;
-    const seed = `${category}-${index}-${Date.now()}`;
-    return `https://picsum.photos/${width}/${height}?random=${encodeURIComponent(seed)}`;
+  static generateImageSearchUrl(query: string): string {
+    // Use Unsplash API with search query for relevant images
+    // Query is URL-encoded and used to search for images matching the story
+    const encodedQuery = encodeURIComponent(query.substring(0, 50)); // Limit query length
+    // Using Unsplash source which provides free stock images
+    return `https://source.unsplash.com/600x400/?${encodedQuery}`;
+  }
+
+  static extractImageQuery(headline: string, imageDescription: string): string {
+    // Create search query from headline and image description
+    // Use image description as primary, fallback to headline
+    if (imageDescription && imageDescription.toLowerCase() !== 'not available') {
+      return imageDescription;
+    }
+
+    // Fallback: extract key terms from headline
+    return headline.split(' ').slice(0, 3).join(' ');
   }
 
   static parseGeneratedContent(content: string): NewsStory[] {
     const stories: NewsStory[] = [];
     const storyBlocks = content.split(/(?=- Headline:)/);
-    let storyIndex = 0;
 
     for (const block of storyBlocks) {
       if (!block.trim()) continue;
@@ -32,32 +42,27 @@ export class StoryFormattingService {
       const headlineMatch = block.match(/- Headline:\s*(.+?)(?:\n|$)/);
       const summaryMatch = block.match(/- Summary:\s*(.+?)(?=- Category:|$)/s);
       const categoryMatch = block.match(/- Category:\s*(business|stock-market|sports|math)/i);
-      const imageMatch = block.match(/\[IMAGE:\s*(.+?)\s*\]/);
+      const imageMatch = block.match(/- Image:\s*(.+?)(?:\n|$)/);
 
       if (headlineMatch && summaryMatch && categoryMatch) {
         let summary = summaryMatch[1].trim();
+        const headline = headlineMatch[1].trim();
+        const imageDescription = imageMatch ? imageMatch[1].trim() : '';
 
-        // Extract image URL if present, otherwise generate placeholder
-        let imageUrl = imageMatch ? imageMatch[1].trim() : undefined;
-
-        // Remove [IMAGE:...] tags from summary
+        // Remove [IMAGE:...] tags from summary if they exist
         summary = summary.replace(/\s*\[IMAGE:[^\]]*\]\s*/g, '');
 
-        // Generate placeholder if no image provided
-        if (!imageUrl || imageUrl.toLowerCase() === 'not available') {
-          const category = categoryMatch[1].toLowerCase();
-          imageUrl = StoryFormattingService.generatePlaceholderImage(category, storyIndex);
-        }
+        // Generate image URL based on image description or headline
+        const imageQuery = StoryFormattingService.extractImageQuery(headline, imageDescription);
+        const imageUrl = StoryFormattingService.generateImageSearchUrl(imageQuery);
 
         stories.push({
           id: `story-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          headline: headlineMatch[1].trim(),
+          headline: headline,
           summary: summary,
           category: categoryMatch[1].toLowerCase() as 'business' | 'stock-market' | 'sports' | 'math',
           imageUrl: imageUrl,
         });
-
-        storyIndex++;
       }
     }
 

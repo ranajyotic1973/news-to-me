@@ -15,32 +15,51 @@ export class PromptBuilder {
       ? `The primary stock market index for ${context.childCountry} is the ${context.stockMarketIndex}.`
       : '';
 
-    return `Create 4 news stories for a ${context.childAge}-year-old.
+    return `Create 4 news stories for a ${context.childAge}-year-old from ${context.childCountry}.
 
 ${ageAppropriateGuidance}
 ${countryContext}
 
+IMPORTANT: Focus on current news and events SPECIFICALLY FROM ${context.childCountry}. Include local companies, sports teams, and events from this country.
+
 For EACH story, write EXACTLY in this format:
 
-- Headline: [headline with company name and number]
-- Summary: [2-3 sentences with company names, numbers, stock ticker]
+- Headline: [headline with relevant numbers/names]
+- Summary: [2-3 sentences with specific details, numbers, or statistics]
 - Category: [business, stock-market, sports, or math]
+- Image: [brief description of a relevant image for this story]
 
-Example:
-- Headline: Apple Inc. Reports $81.8 Billion Revenue
-- Summary: Apple (AAPL) announced Q3 earnings of $81.8 billion, up 5.2% year-over-year. iPhone sales reached $34.4 billion representing 42% of revenue. The company's stock surged 4.7% to $189.45.
+CATEGORY DEFINITIONS:
+1. BUSINESS: Company news, industry developments, business leaders from ${context.childCountry}
+2. STOCK-MARKET: Stock prices, market indices (especially ${context.stockMarketIndex}), investor news
+3. SPORTS: Pure sports news - teams, players, games, championships from ${context.childCountry} or world sports
+4. MATH: Pure mathematics - math olympiad, interesting numbers/statistics, educational puzzles, NOT financial math
+
+EACH STORY MUST:
+- Be about current/recent news from ${context.childCountry}
+- Include specific numbers, names, or statistics kids can explore
+- Have a clear Image description for visualization (e.g., "sports stadium during match" or "mathematician solving equation")
+- Be age-appropriate and engaging
+
+Example Business Story:
+- Headline: TechCorp in ${context.childCountry} Launches New AI Platform
+- Summary: Local tech company TechCorp announced a breakthrough AI platform that could help 50,000 students with homework. The company invested \$5 million in development over 18 months.
 - Category: business
+- Image: modern office building with technology displays
 
-Guidelines:
-- Include real company names with stock tickers (e.g., AAPL, MSFT, TSLA)
-- Add specific numbers, percentages, financial figures kids can explore
-- Mix business, stock-market, sports, and math stories equally
-- Include fiction stories (fairy tales, adventures, mysteries) to keep it engaging
-- Make stories educational and explorable
-- DO NOT include [IMAGE: ...] or image descriptions in the summary
-- Focus on storytelling, not visuals
+Example Sports Story:
+- Headline: National Football Team Wins Championship Match
+- Summary: The ${context.childCountry} national team defeated rivals 3-2 in an exciting match. Star player scored 2 goals in the final minutes.
+- Category: sports
+- Image: excited crowd in stadium celebrating
 
-Generate 4 stories now:`;
+Example Math Story:
+- Headline: Young Math Genius Wins International Olympiad
+- Summary: 15-year-old from ${context.childCountry} won gold at the International Math Olympiad by solving complex geometry problems.
+- Category: math
+- Image: student at blackboard with mathematical equations
+
+Generate 4 diverse stories - mix all categories. Focus on ${context.childCountry} news!`;
   }
 
   static buildNewsGenerationPrompt(
