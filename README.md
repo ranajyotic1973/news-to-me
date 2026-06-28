@@ -12,11 +12,12 @@ News To Me is an educational app that teaches financial literacy through AI-powe
 
 **Download the installer for your computer:**
 
-| Platform | Download | Size |
-|----------|----------|------|
-| **Windows** | [📥 News To Me Setup.exe](https://github.com/ranajyotic1973/news-to-me/releases/latest/download/News-To-Me-Setup.exe) | ~150 MB |
-| **Mac (Intel & Apple Silicon)** | [📥 News To Me.dmg](https://github.com/ranajyotic1973/news-to-me/releases/latest/download/News-To-Me.dmg) | ~180 MB |
-| **Linux** | [📥 News-To-Me.AppImage](https://github.com/ranajyotic1973/news-to-me/releases/latest/download/News-To-Me.AppImage) | ~160 MB |
+👉 **[📥 Download Latest Release →](https://github.com/ranajyotic1973/news-to-me/releases/latest)**
+
+The latest release includes installers for:
+- 💻 **Windows** - `News-To-Me-Setup.exe` (~150 MB)
+- 🍎 **macOS** - `News-To-Me.dmg` (~180 MB) - Works on Intel & Apple Silicon
+- 🐧 **Linux** - `News-To-Me.AppImage` (~160 MB) or `.deb` package
 
 **[View all releases →](https://github.com/ranajyotic1973/news-to-me/releases)**
 
@@ -115,6 +116,92 @@ News To Me uses AI to generate news summaries. You need to choose one provider:
 - Tap stories to learn more
 - Swipe or click arrows to navigate pages
 - Click "Regenerate" to get new stories
+
+---
+
+## 💻 Development
+
+### Running Locally
+
+Want to run News To Me on your computer for development or testing?
+
+**Prerequisites:**
+- Node.js 18+ ([Download](https://nodejs.org/))
+- npm (comes with Node.js)
+
+**Steps:**
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ranajyotic1973/news-to-me.git
+   cd news-to-me
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the backend server** (Terminal 1):
+   ```bash
+   npm run dev:backend
+   ```
+   Backend will run on `http://localhost:3001`
+
+4. **Start the frontend dev server** (Terminal 2):
+   ```bash
+   npm run dev
+   ```
+   Frontend will run on `http://localhost:5173`
+
+5. **Open your browser:**
+   - Go to `http://localhost:5173`
+   - Enter your name, age (10-16), and country
+   - Add your LLM API key (Google Gemini recommended - it's free!)
+   - Start reading news!
+
+### Building the Desktop App Locally
+
+Want to build the Electron desktop app for your platform?
+
+```bash
+# Build all components and create installer
+npm run build
+
+# Build for your platform only
+npm run dist:win    # Windows
+npm run dist:mac    # macOS
+npm run dist:linux  # Linux
+```
+
+Installers will be created in the `dist-final/` directory.
+
+### Project Structure
+
+```
+news-to-me/
+├── src/
+│   ├── frontend/          # React UI
+│   ├── backend/           # Express.js server
+│   ├── main/              # Electron main process
+│   └── preload/           # Electron preload script
+├── dist/                  # Built frontend & backend
+├── dist-electron/         # Built Electron process
+├── BUILDING.md            # Detailed build guide
+├── CLAUDE.md              # Architecture & design principles
+└── package.json           # Dependencies & scripts
+```
+
+### Development Commands
+
+```bash
+npm run dev              # Start frontend dev server
+npm run dev:backend      # Start backend dev server
+npm run build            # Build all for production
+npm run type-check       # TypeScript type checking
+npm run lint             # ESLint code linting
+npm run test             # Run unit tests
+```
 
 ---
 
