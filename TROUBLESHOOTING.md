@@ -98,6 +98,89 @@ This guide helps you resolve common issues with News To Me.
 3. **Reset Configuration**
    - Delete any custom configuration files
    - Reinstall the application
+
+## Backend Startup Errors
+
+### Problem: "Backend Startup Timeout" error
+
+**Symptoms**:
+- Error dialog appears when launching application
+- Message says "Server startup timeout"
+- Backend may be misconfigured or crashed
+
+**Solutions**:
+1. **Check Application Logs**
+   - Windows: Open `%APPDATA%\News To Me\logs\`
+   - macOS: Open `~/.news-to-me/logs/`
+   - Linux: Open `~/.news-to-me/logs/`
+   - Look for today's log file and read the error details
+   - These logs contain specific error messages from the backend
+
+2. **Reinstall the Application**
+   - Uninstall News To Me completely
+   - Restart your computer
+   - Reinstall News To Me
+   - This refreshes the bundled backend
+
+3. **Check System Requirements**
+   - Ensure you have at least 500 MB free disk space
+   - Verify your system meets minimum requirements
+   - Check for sufficient RAM (2GB minimum)
+
+### Problem: "Backend Process Crashed" error
+
+**Symptoms**:
+- Error dialog appears immediately on launch
+- Logs show the backend process exited unexpectedly
+
+**Solutions**:
+1. **Review Crash Logs**
+   - Open the logs directory (see above)
+   - Look for stderr output showing the crash reason
+   - Common issues: missing dependencies, corrupted files
+
+2. **Check for System Updates**
+   - Update Windows, macOS, or Linux
+   - Update graphics drivers
+   - Restart after updates
+
+3. **Run Diagnostic**
+   - Delete configuration file: `%APPDATA%\News To Me\app-config.json`
+   - Restart the application
+   - Go through the setup process again
+
+## Application Logs
+
+### Where to Find Logs
+
+Logs are automatically created when the application runs:
+- **Windows**: `C:\Users\YourUsername\AppData\Roaming\News To Me\logs\`
+- **macOS**: `~/Library/Application Support/News To Me/logs/`
+- **Linux**: `~/.news-to-me/logs/`
+
+### What Logs Contain
+
+- Application startup sequence with timestamps
+- Backend process events (start, stop, errors)
+- Health check attempts and results
+- API requests and responses
+- Configuration changes
+
+### How to Read Logs
+
+1. Open the logs directory
+2. Find today's log file (named with today's date)
+3. Look for `[ERROR]` entries to identify problems
+4. Check timestamps to correlate with when errors occurred
+5. Share relevant error sections when reporting issues
+
+### Logs for Troubleshooting
+
+When reporting an issue, include:
+1. Your operating system and version
+2. Application version (from About menu)
+3. Error message shown in dialog
+4. Relevant sections from the application log file (last 50 lines usually sufficient)
    - Use default configuration
 
 ### Problem: Backend crashes immediately after starting

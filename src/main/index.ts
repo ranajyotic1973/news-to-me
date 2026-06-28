@@ -4,6 +4,7 @@ import isDev from 'electron-is-dev';
 import open from 'open';
 import { serverManager } from './server';
 import { setupIPC } from './ipc';
+import { logger } from './logger';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -122,10 +123,12 @@ const createMenu = (): void => {
 };
 
 app.on('ready', async () => {
+  logger.info('Application starting...');
   createMenu();
 
   try {
     await serverManager.startServer();
+    logger.info('Backend server started successfully');
     setupIPC();
 
     // Launch browser to the backend UI
@@ -136,13 +139,40 @@ app.on('ready', async () => {
       await createWindow();
     }
   } catch (error) {
-    console.error('Failed to start application:', error);
-    dialog.showErrorBox(
-      'Startup Error',
-      `Failed to start News To Me application:\n\n${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+    logger.error('Failed to start application:', error);
+
+    const serverError = serverManager.getLastError();
+    let errorMessage = 'Failed to start News To Me application';
+    let detailedMessage = '';
+
+    if (serverError) {
+      switch (serverError.type) {
+        case 'port-conflict':
+          errorMessage = 'Backend Port Already In Use';
+          detailedMessage = serverError.message + '\n\nPlease close other News To Me instances and try again.';
+          break;
+        case 'timeout':
+          errorMessage = 'Backend Startup Timeout';
+          detailedMessage = serverError.message + '\n\nLogs are saved to: ' + logger.getLogDir();
+          if (serverError.stderr) {
+            detailedMessage += '\n\nError details:\n' + serverError.stderr.substring(0, 500);
+          }
+          break;
+        case 'crashed':
+          errorMessage = 'Backend Process Crashed';
+          detailedMessage = serverError.message + '\n\nPlease check the logs for more information: ' + logger.getLogDir();
+          if (serverError.stderr) {
+            detailedMessage += '\n\nError details:\n' + serverError.stderr.substring(0, 500);
+          }
+          break;
+        default:
+          detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
+      }
+    } else {
+      detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
+    }
+
+    dialog.showErrorBox(errorMessage, detailedMessage);
     app.quit();
   }
 });

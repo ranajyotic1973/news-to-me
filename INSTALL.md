@@ -8,6 +8,10 @@ Follow these steps to install News To Me on your Windows computer.
 - Administrator privileges for installation (Windows will prompt you)
 - Approximately 150-200 MB of free disk space
 
+### Important: Node.js is NOT Required
+
+News To Me is a complete, standalone application. **You do NOT need to install Node.js** to run it. The application includes everything it needs bundled inside the installer. Just download and run the installer!
+
 ## Installation Steps
 
 1. **Download the Installer**

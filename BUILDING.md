@@ -42,9 +42,56 @@ Outputs: `dist/` (production-optimized React assets)
 ### Backend Only
 ```bash
 npm run build:backend:js
-npm run build:backend
+npx pkg dist/backend/index.js --compress Brotli --targets node18-win-x64 --output dist-backend/backend.exe
 ```
 Outputs: `dist-backend/backend.exe` (standalone backend executable)
+
+## Backend Bundling with pkg
+
+The backend is bundled into a standalone executable using the `pkg` tool so users don't need Node.js installed.
+
+### pkg Configuration
+
+Configuration is in `package.json`:
+
+```json
+{
+  "pkg": {
+    "assets": [
+      "dist/backend/**/*",
+      "node_modules/**/*"
+    ],
+    "scripts": [
+      "dist/backend/**/*.js"
+    ],
+    "compress": "Brotli",
+    "targets": [
+      "node18-win-x64",
+      "node18-macos-x64",
+      "node18-macos-arm64",
+      "node18-linux-x64"
+    ]
+  }
+}
+```
+
+### What pkg Does
+
+- **assets**: Includes all required files and node_modules in the executable
+- **scripts**: Specifies which files contain executable code
+- **compress**: Compresses the bundle using Brotli (reduces size by ~40%)
+- **targets**: Creates binaries for each platform/architecture
+
+### Platform-Specific Builds
+
+The GitHub Actions workflow automatically creates platform-specific binaries:
+
+- **Windows**: `node18-win-x64` → `backend.exe`
+- **macOS x64**: `node18-macos-x64` → `backend`
+- **macOS ARM64**: `node18-macos-arm64` → `backend` (Apple Silicon)
+- **Linux**: `node18-linux-x64` → `backend`
+
+Each platform gets its own optimized binary bundled in the installer.
 
 ### Electron App Only
 ```bash
