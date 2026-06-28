@@ -74,7 +74,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: news-to-me-windows
-          path: dist-final/
+          path: |
+            dist-final/*.exe
+            dist-final/*.blockmap
           retention-days: 30
 
       - name: Upload artifacts (macOS)
@@ -82,7 +84,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: news-to-me-macos
-          path: dist-final/
+          path: |
+            dist-final/*.dmg
+            dist-final/*.zip
+            dist-final/*.blockmap
           retention-days: 30
 
       - name: Upload artifacts (Linux)
@@ -90,7 +95,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: news-to-me-linux
-          path: dist-final/
+          path: |
+            dist-final/*.AppImage
+            dist-final/*.deb
+            dist-final/*.blockmap
           retention-days: 30
 
   create-release:
