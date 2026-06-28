@@ -2,31 +2,11 @@ import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
 import path from 'path';
 import isDev from 'electron-is-dev';
 import open from 'open';
-import { serverManager } from './server';
 import { setupIPC } from './ipc';
+import { setupIpcHandlers } from './ipcHandlers';
 import { logger } from './logger';
 
 let mainWindow: BrowserWindow | null = null;
-
-// Launches the default system browser to display the backend-served UI.
-// This is called in production mode after the backend server is ready.
-const launchBrowserUI = async (): Promise<void> => {
-  try {
-    const url = serverManager.getUrl();
-    console.log(`Launching browser with URL: ${url}`);
-    await open(url);
-  } catch (error) {
-    console.error('Failed to open browser:', error);
-    const message =
-      error instanceof Error ? error.message : 'Unknown error occurred';
-    dialog.showErrorBox(
-      'Browser Launch Error',
-      `Could not open the News To Me application in your browser.\n\n` +
-        `Try opening this URL manually in your browser:\n${serverManager.getUrl()}\n\n` +
-        `Error: ${message}`
-    );
-  }
-};
 
 const createWindow = async (): Promise<void> => {
   mainWindow = new BrowserWindow({
@@ -132,45 +112,17 @@ app.on('ready', async () => {
   createMenu();
 
   try {
-    await serverManager.startServer();
-    logger.info('Backend server started successfully');
+    // Setup IPC handlers for backend logic
+    setupIpcHandlers();
     setupIPC();
 
-    // In development and production, create Electron window
+    // Create Electron window
     await createWindow();
+    logger.info('Application started successfully');
   } catch (error) {
     logger.error('Failed to start application:', error);
-
-    const serverError = serverManager.getLastError();
-    let errorMessage = 'Failed to start News To Me application';
-    let detailedMessage = '';
-
-    if (serverError) {
-      switch (serverError.type) {
-        case 'port-conflict':
-          errorMessage = 'Backend Port Already In Use';
-          detailedMessage = serverError.message + '\n\nPlease close other News To Me instances and try again.';
-          break;
-        case 'timeout':
-          errorMessage = 'Backend Startup Timeout';
-          detailedMessage = serverError.message + '\n\nLogs are saved to: ' + logger.getLogDir();
-          if (serverError.stderr) {
-            detailedMessage += '\n\nError details:\n' + serverError.stderr.substring(0, 500);
-          }
-          break;
-        case 'crashed':
-          errorMessage = 'Backend Process Crashed';
-          detailedMessage = serverError.message + '\n\nPlease check the logs for more information: ' + logger.getLogDir();
-          if (serverError.stderr) {
-            detailedMessage += '\n\nError details:\n' + serverError.stderr.substring(0, 500);
-          }
-          break;
-        default:
-          detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
-      }
-    } else {
-      detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
-    }
+    const errorMessage = 'Failed to start News To Me';
+    const detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
 
     dialog.showErrorBox(errorMessage, detailedMessage);
     app.quit();
@@ -189,11 +141,6 @@ app.on('activate', async () => {
   }
 });
 
-app.on('before-quit', async () => {
-  await serverManager.stopServer();
-});
-
-// Handle app closing via Electron menu
-app.on('quit', async () => {
-  await serverManager.stopServer();
+app.on('before-quit', () => {
+  logger.info('Application closing...');
 });

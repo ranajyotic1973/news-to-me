@@ -1,28 +1,54 @@
-// Determine API base URL
-// In production (Electron), backend runs on localhost:3001
-// In development, use VITE_API_URL or default to localhost:5000
-const getApiBaseUrl = (): string => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  // Production: backend is on port 3001
-  if (!import.meta.env.DEV) {
-    return 'http://localhost:3001';
-  }
-  // Development: default to localhost:5000
-  return 'http://localhost:5000';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+// Import Electron IPC for desktop app communication
+const { ipcRenderer } = window.require('electron');
 
 export interface ApiError {
   message: string;
-  status: number;
+  status?: number;
 }
 
 export class ApiService {
   static async get<T>(endpoint: string, params?: Record<string, string | number>): Promise<T> {
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
+    try {
+      // Use IPC for backend communication in Electron
+      if (ipcRenderer) {
+        return await this.ipcCall<T>(endpoint, params);
+      }
+      // Fallback to HTTP for web dev server
+      return await this.httpCall<T>(endpoint, params);
+    } catch (error) {
+      throw {
+        message: error instanceof Error ? error.message : 'Request failed',
+      };
+    }
+  }
+
+  static async post<T>(endpoint: string, data: unknown): Promise<T> {
+    try {
+      if (ipcRenderer) {
+        return await this.ipcCall<T>(endpoint, data as Record<string, unknown>);
+      }
+      return await this.httpCall<T>(endpoint, undefined, data);
+    } catch (error) {
+      throw {
+        message: error instanceof Error ? error.message : 'Request failed',
+      };
+    }
+  }
+
+  private static async ipcCall<T>(endpoint: string, data?: Record<string, unknown>): Promise<T> {
+    // Convert HTTP-style endpoints to IPC channel names
+    const channel = this.endpointToIpcChannel(endpoint);
+    const args = data ? Object.values(data) : [];
+
+    return await ipcRenderer.invoke(channel, ...args);
+  }
+
+  private static async httpCall<T>(
+    endpoint: string,
+    params?: Record<string, string | number>,
+    data?: unknown
+  ): Promise<T> {
+    const url = new URL(`http://localhost:5173${endpoint}`);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, String(value));
@@ -30,28 +56,11 @@ export class ApiService {
     }
 
     const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
-      cache: 'no-store',
-    });
-
-    return ApiService.handleResponse<T>(response);
-  }
-
-  static async post<T>(endpoint: string, data: unknown): Promise<T> {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
+      method: data ? 'POST' : 'GET',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: data ? JSON.stringify(data) : undefined,
     });
 
-    return ApiService.handleResponse<T>(response);
-  }
-
-  private static async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       throw {
@@ -61,6 +70,25 @@ export class ApiService {
     }
 
     return response.json() as Promise<T>;
+  }
+
+  private static endpointToIpcChannel(endpoint: string): string {
+    // Convert /api/config/validate-token to config:validateToken
+    // Convert /api/newspaper/page/1 to newspaper:getPage
+    const parts = endpoint.split('/').filter((p) => p && p !== 'api');
+
+    if (parts[0] === 'config') {
+      if (parts[1] === 'validate-token') return 'config:validateToken';
+      if (parts[1] === 'list-models') return 'config:listModels';
+      if (parts[1] === 'providers') return 'config:getProviders';
+    }
+
+    if (parts[0] === 'newspaper') {
+      if (parts[1] === 'page') return 'newspaper:getPage';
+      if (parts[1] === 'regenerate') return 'newspaper:regenerateContent';
+    }
+
+    throw new Error(`Unknown endpoint: ${endpoint}`);
   }
 }
 
