@@ -32,7 +32,11 @@
     "stock-market",
     "newspaper"
   ],
-  "author": "",
+  "author": {
+    "name": "News To Me",
+    "email": "ranajyotic@gmail.com"
+  },
+  "desktopName": "News To Me",
   "license": "ISC",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",

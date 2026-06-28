@@ -58,7 +58,12 @@
       "deb"
     ],
     "icon": "build/icon.png",
-    "category": "News;Utility"
+    "category": "News;Utility",
+    "syncDesktopName": true,
+    "desktop": {
+      "Name": "News To Me",
+      "Comment": "Learn about business and finance through AI-powered news"
+    }
   },
   "deb": {
     "depends": ["libnotify4"]
