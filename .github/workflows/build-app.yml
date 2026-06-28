@@ -32,8 +32,26 @@ jobs:
       - name: Type check
         run: npm run type-check
 
-      - name: Build application
-        run: npm run build:web
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Build backend JavaScript
+        run: npm run build:backend:js
+
+      - name: Build Electron main process
+        run: npm run build:electron
+
+      - name: Build backend executable (Windows)
+        if: runner.os == 'Windows'
+        run: npx pkg dist/backend/index.js --compress Brotli --targets node18-win-x64 --output dist-backend/backend.exe
+
+      - name: Build backend executable (macOS)
+        if: runner.os == 'macOS'
+        run: npx pkg dist/backend/index.js --compress Brotli --targets node18-macos-x64,node18-macos-arm64 --output dist-backend/backend
+
+      - name: Build backend executable (Linux)
+        if: runner.os == 'Linux'
+        run: npx pkg dist/backend/index.js --compress Brotli --targets node18-linux-x64 --output dist-backend/backend
 
       - name: Build desktop app (Windows)
         if: runner.os == 'Windows'

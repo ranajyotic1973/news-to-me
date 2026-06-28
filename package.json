@@ -7,10 +7,9 @@
   "scripts": {
     "dev": "vite",
     "dev:backend": "nodemon --exec ts-node src/backend/index.ts",
-    "build": "npm run build:frontend && npm run build:backend && npm run build:electron && npm run dist:win",
+    "build": "npm run build:frontend && npm run build:backend:js && npm run build:electron",
     "build:frontend": "vite build",
     "build:backend:js": "tsc src/backend/index.ts --outDir dist/backend --module commonjs --target es2020 --esModuleInterop --resolveJsonModule",
-    "build:backend": "npm run build:backend:js && pkg dist/backend/index.js --compress Brotli --targets node18-win-x64 --output dist-backend/backend.exe",
     "build:electron": "tsc src/main/index.ts src/main/server.ts src/main/ipc.ts src/preload/index.ts --outDir dist-electron --module commonjs --target es2020 --esModuleInterop --resolveJsonModule",
     "build:web": "tsc && vite build",
     "build:app": "tsc && vite build",
