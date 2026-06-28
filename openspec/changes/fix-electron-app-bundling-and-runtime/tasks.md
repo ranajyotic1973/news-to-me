@@ -47,6 +47,8 @@
 - [ ] 6.5 Test Linux .deb installation without Node.js
 - [ ] 6.6 Verify all installed applications start successfully and are fully functional
 
+**Status**: Pending runtime testing on multiple systems. GitHub Actions will build installers on next release tag.
+
 ## 7. Documentation Updates
 
 - [x] 7.1 Update TROUBLESHOOTING.md with backend startup error solutions
@@ -62,3 +64,5 @@
 - [ ] 8.3 Verify offline functionality after initial configuration
 - [ ] 8.4 Test error messages appear correctly when backend fails
 - [ ] 8.5 Test log files are created and contain diagnostic information
+
+**Status**: Pending end-to-end testing. Recommend testing after GitHub Actions successfully builds v1.0.1 installers.
