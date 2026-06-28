@@ -8,18 +8,17 @@ News To Me is an educational app that teaches financial literacy through AI-powe
 
 ## 🚀 Quick Download
 
-### Latest Release: v1.1.0
+### Latest Release
 
 **Download the installer for your computer:**
 
-| Platform | Download | Size | Version |
-|----------|----------|------|---------|
-| **Windows** | [News To Me Setup.exe](https://github.com/ranajyotic1973/news-to-me/releases/download/v1.1.0/News-To-Me-Setup.exe) | ~150 MB | v1.1.0 |
-| **Mac (Intel)** | [News To Me.dmg](https://github.com/ranajyotic1973/news-to-me/releases/download/v1.1.0/News-To-Me.dmg) | ~180 MB | v1.1.0 |
-| **Mac (Apple Silicon)** | [News To Me.dmg](https://github.com/ranajyotic1973/news-to-me/releases/download/v1.1.0/News-To-Me.dmg) | ~180 MB | v1.1.0 |
-| **Linux** | [News-To-Me.AppImage](https://github.com/ranajyotic1973/news-to-me/releases/download/v1.1.0/News-To-Me.AppImage) | ~160 MB | v1.1.0 |
+| Platform | Download | Size |
+|----------|----------|------|
+| **Windows** | [📥 News To Me Setup.exe](https://github.com/ranajyotic1973/news-to-me/releases/latest/download/News-To-Me-Setup.exe) | ~150 MB |
+| **Mac (Intel & Apple Silicon)** | [📥 News To Me.dmg](https://github.com/ranajyotic1973/news-to-me/releases/latest/download/News-To-Me.dmg) | ~180 MB |
+| **Linux** | [📥 News-To-Me.AppImage](https://github.com/ranajyotic1973/news-to-me/releases/latest/download/News-To-Me.AppImage) | ~160 MB |
 
-**[View all releases](https://github.com/ranajyotic1973/news-to-me/releases)**
+**[View all releases →](https://github.com/ranajyotic1973/news-to-me/releases)**
 
 ---
 

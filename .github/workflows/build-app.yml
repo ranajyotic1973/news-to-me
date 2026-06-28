@@ -45,18 +45,6 @@ jobs:
       - name: Build Electron main process
         run: npm run build:electron
 
-      - name: Build backend executable (Windows)
-        if: runner.os == 'Windows'
-        run: npx pkg dist/backend/index.js --compress Brotli --targets node18-win-x64 --output dist-backend/backend.exe
-
-      - name: Build backend executable (macOS)
-        if: runner.os == 'macOS'
-        run: npx pkg dist/backend/index.js --compress Brotli --targets node18-macos-x64,node18-macos-arm64 --output dist-backend/backend
-
-      - name: Build backend executable (Linux)
-        if: runner.os == 'Linux'
-        run: npx pkg dist/backend/index.js --compress Brotli --targets node18-linux-x64 --output dist-backend/backend
-
       - name: Build desktop app (Windows)
         if: runner.os == 'Windows'
         run: npm run dist:win -- --publish never
@@ -116,11 +104,47 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            news-to-me-windows/**
-            news-to-me-macos/**
-            news-to-me-linux/**
+            news-to-me-windows/**/*.exe
+            news-to-me-windows/**/*.blockmap
+            news-to-me-macos/**/*.dmg
+            news-to-me-macos/**/*.zip
+            news-to-me-macos/**/*.blockmap
+            news-to-me-linux/**/*.AppImage
+            news-to-me-linux/**/*.deb
+            news-to-me-linux/**/*.blockmap
           draft: false
           prerelease: false
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old releases (keep only latest 2)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releases = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            const releasesToDelete = releases.data.slice(2);
+            for (const release of releasesToDelete) {
+              console.log(`Deleting release ${release.tag_name}`);
+
+              // Delete all assets in the release
+              for (const asset of release.assets) {
+                await github.rest.repos.deleteReleaseAsset({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  asset_id: asset.id
+                });
+              }
+
+              // Delete the release
+              await github.rest.repos.deleteRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.id
+              });
+            }
