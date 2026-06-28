@@ -23,9 +23,15 @@ export class ServerManager {
   // Starts the backend server as a child process and waits for it to be ready.
   // In development, runs from dist/backend/index.js; in production, from bundled executable.
   async startServer(): Promise<void> {
-    const serverPath = isDev
-      ? path.join(__dirname, '../../dist/backend/index.js')
-      : path.join(process.resourcesPath, 'backend/index.js');
+    let serverPath: string;
+
+    if (isDev) {
+      // In development, server is in dist/backend/
+      serverPath = path.join(process.cwd(), 'dist/backend/index.js');
+    } else {
+      // In production, server is in app resources
+      serverPath = path.join(process.resourcesPath || process.cwd(), 'dist/backend/index.js');
+    }
 
     logger.info(`Starting server from: ${serverPath}`);
 
