@@ -106,6 +106,7 @@ export interface NewsStory {
   headline: string;
   summary: string;
   category: 'business' | 'stock-market' | 'sports' | 'math';
+  imageUrl?: string;
 }
 
 export interface NewspaperPageResponse {

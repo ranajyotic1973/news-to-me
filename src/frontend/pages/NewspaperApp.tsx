@@ -17,6 +17,7 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const loadPage = async (pageNum: number): Promise<void> => {
     setLoading(true);
@@ -93,6 +94,18 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
     }
   };
 
+  const handleCategoryChange = (category: string): void => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const getFilteredStories = (): NewsStory[] => {
+    if (selectedCategory === 'all') {
+      return stories;
+    }
+    return stories.filter((story) => story.category === selectedCategory);
+  };
+
   if (showSettings) {
     return (
       <OnboardingScreen onConfigurationComplete={handleSettingsSaved} />
@@ -148,10 +161,12 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
       <NewspaperPage
         pageNumber={currentPage}
         totalPages={totalPages}
-        stories={stories}
+        stories={getFilteredStories()}
         loading={loading}
         onNextPage={handleNextPage}
         onPreviousPage={handlePreviousPage}
+        currentTopic={selectedCategory}
+        onTopicChange={handleCategoryChange}
       />
     </div>
   );

@@ -5,6 +5,7 @@ export interface NewsStory {
   headline: string;
   summary: string;
   category: 'business' | 'stock-market' | 'sports' | 'math';
+  imageUrl?: string;
 }
 
 interface NewspaperPageProps {
@@ -111,6 +112,20 @@ function NewspaperPage({
         ) : (
           displayStories.map((story) => (
             <div key={story.id} className="story-card">
+              {story.imageUrl && (
+                <img
+                  src={story.imageUrl}
+                  alt={story.headline}
+                  className="story-image"
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    objectFit: 'cover',
+                    marginBottom: '10px',
+                    borderRadius: '4px',
+                  }}
+                />
+              )}
               <div
                 className="category-badge"
                 style={{ backgroundColor: getCategoryColor(story.category) }}
