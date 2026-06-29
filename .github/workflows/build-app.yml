@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: news-to-me-windows
-          path: dist-final/*.exe
+          path: dist-final/News To Me Setup*.exe
           retention-days: 30
 
       - name: Upload artifacts (macOS)
@@ -103,7 +103,7 @@ jobs:
         run: |
           mkdir -p release-files
           ls -la news-to-me-*/ || true
-          cp news-to-me-windows/*.exe release-files/ || true
+          cp news-to-me-windows/"News To Me Setup"*.exe release-files/ || true
           cp news-to-me-macos/*.dmg release-files/ || true
           cp news-to-me-macos/*.zip release-files/ || true
           cp news-to-me-linux/*.AppImage release-files/ || true
