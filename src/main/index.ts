@@ -1,10 +1,11 @@
 import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
 import path from 'path';
-import isDev from 'electron-is-dev';
-import open from 'open';
 import { setupIPC } from './ipc';
 import { setupIpcHandlers } from './ipcHandlers';
 import { logger } from './logger';
+
+// Check if running in development mode (no external dependency)
+const isDev = !app.isPackaged;
 
 let mainWindow: BrowserWindow | null = null;
 

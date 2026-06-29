@@ -1,8 +1,11 @@
 import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
-import isDev from 'electron-is-dev';
+import { app } from 'electron';
 import http from 'http';
 import { logger } from './logger';
+
+// Check if running in development mode
+const isDev = !app.isPackaged;
 
 export interface ServerError {
   type: 'port-conflict' | 'crashed' | 'timeout' | 'unknown';
