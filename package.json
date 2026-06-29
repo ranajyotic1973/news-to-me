@@ -1,6 +1,6 @@
 {
   "name": "news-to-me",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "A newspaper app for kids aged 10-16 focused on business and stock market news",
   "main": "dist-electron/main/index.js",
   "homepage": "./",

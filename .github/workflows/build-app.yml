@@ -62,9 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: news-to-me-windows
-          path: |
-            dist-final/*.exe
-            dist-final/*.blockmap
+          path: dist-final/*.exe
           retention-days: 30
 
       - name: Upload artifacts (macOS)
@@ -75,7 +73,6 @@ jobs:
           path: |
             dist-final/*.dmg
             dist-final/*.zip
-            dist-final/*.blockmap
           retention-days: 30
 
       - name: Upload artifacts (Linux)
@@ -86,7 +83,6 @@ jobs:
           path: |
             dist-final/*.AppImage
             dist-final/*.deb
-            dist-final/*.blockmap
           retention-days: 30
 
   create-release:
@@ -100,12 +96,16 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
-      - name: Filter installers only
+      - name: Prepare release files
         run: |
           mkdir -p release-files
-          find news-to-me-windows -maxdepth 1 -name "*.exe" -exec cp {} release-files/ \;
-          find news-to-me-macos -maxdepth 1 \( -name "*.dmg" -o -name "*.zip" \) -exec cp {} release-files/ \;
-          find news-to-me-linux -maxdepth 1 \( -name "*.AppImage" -o -name "*.deb" \) -exec cp {} release-files/ \;
+          ls -la news-to-me-*/ || true
+          cp news-to-me-windows/*.exe release-files/ || true
+          cp news-to-me-macos/*.dmg release-files/ || true
+          cp news-to-me-macos/*.zip release-files/ || true
+          cp news-to-me-linux/*.AppImage release-files/ || true
+          cp news-to-me-linux/*.deb release-files/ || true
+          ls -la release-files/
         shell: bash
 
       - name: Create Release
