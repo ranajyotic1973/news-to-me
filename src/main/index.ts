@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut } from 'electron';
 import path from 'path';
 import { setupIPC } from './ipc';
 import { setupIpcHandlers } from './ipcHandlers';
@@ -43,16 +43,10 @@ const createWindow = async (): Promise<void> => {
     throw error;
   }
 
-  // Enable DevTools in both dev and production for debugging
-  mainWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-      mainWindow?.webContents.toggleDevTools();
-    }
-  });
-
   // Auto-open DevTools in dev mode only
   if (isDev) {
     mainWindow.webContents.openDevTools();
+    logger.info('DevTools auto-opened in dev mode');
   }
 
   mainWindow.on('closed', () => {
@@ -64,67 +58,9 @@ const createWindow = async (): Promise<void> => {
 };
 
 const createMenu = (): void => {
-  const template: any[] = [
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'Exit',
-          accelerator: 'CmdOrCtrl+Q',
-          click: (): void => {
-            app.quit();
-          },
-        },
-      ],
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        { label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
-        { label: 'Redo', accelerator: 'CmdOrCtrl+Y', role: 'redo' },
-        { type: 'separator' },
-        { label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
-        { label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
-        { label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste' },
-      ],
-    },
-    {
-      label: 'View',
-      submenu: [
-        { label: 'Reload', accelerator: 'CmdOrCtrl+R', role: 'reload' },
-        { label: 'Reload (Hard)', accelerator: 'CmdOrCtrl+Shift+R', role: 'forceReload' },
-        { type: 'separator' },
-        { label: 'Zoom In', accelerator: 'CmdOrCtrl+Plus', role: 'zoomIn' },
-        { label: 'Zoom Out', accelerator: 'CmdOrCtrl+Minus', role: 'zoomOut' },
-        { label: 'Reset Zoom', accelerator: 'CmdOrCtrl+0', role: 'resetZoom' },
-      ],
-    },
-    {
-      label: 'Help',
-      submenu: [
-        {
-          label: 'About News To Me',
-          click: (): void => {
-            if (mainWindow) {
-              mainWindow.webContents.send('show:about');
-            }
-          },
-        },
-      ],
-    },
-  ];
-
-  if (isDev) {
-    template.push({
-      label: 'Debug',
-      submenu: [
-        { label: 'Toggle DevTools', accelerator: 'F12', role: 'toggleDevTools' },
-      ],
-    });
-  }
-
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+  // Disable menu for production app
+  logger.info('Application menu disabled');
+  Menu.setApplicationMenu(null);
 };
 
 app.on('ready', async () => {
@@ -145,6 +81,21 @@ app.on('ready', async () => {
   logger.info('Menu created');
 
   try {
+    // Register global shortcuts for DevTools
+    globalShortcut.register('F12', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.toggleDevTools();
+      }
+    });
+    logger.info('F12 shortcut registered for DevTools');
+
+    globalShortcut.register('Ctrl+Shift+I', () => {
+      if (mainWindow && mainWindow.webContents) {
+        mainWindow.webContents.toggleDevTools();
+      }
+    });
+    logger.info('Ctrl+Shift+I shortcut registered for DevTools');
+
     logger.info('Setting up IPC handlers...');
     setupIpcHandlers();
     logger.info('IPC handlers setup complete');
@@ -182,6 +133,8 @@ app.on('activate', async () => {
 
 app.on('before-quit', () => {
   logger.info('Application closing...');
+  globalShortcut.unregisterAll();
+  logger.info('Global shortcuts unregistered');
   logger.info('====================================');
   logger.cleanupLogs();
 });
