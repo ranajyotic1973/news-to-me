@@ -6,19 +6,25 @@ import { NewspaperPage } from '../backend/services/StoryFormattingService';
 
 // Initialize handlers
 export function setupIpcHandlers(): void {
+  logger.info('Initializing IPC handlers...');
+
   // Health check
   ipcMain.handle('health:check', async () => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    logger.trace('IPC: health:check called');
+    const result = { status: 'ok', timestamp: new Date().toISOString() };
+    logger.debug('IPC: health:check result', result);
+    return result;
   });
 
   // Config: Validate Token
   ipcMain.handle('config:validateToken', async (_event, provider: string, apiToken: string) => {
+    logger.trace('IPC: config:validateToken called', { provider, hasToken: !!apiToken });
     try {
       logger.info(`Validating token for provider: ${provider}`);
       const llmProvider = LLMFactory.createProvider(provider as SupportedProvider, apiToken);
       const models = await llmProvider.listModels();
 
-      return {
+      const result = {
         valid: true,
         models: models.map((model) => ({
           id: model.id,
@@ -27,6 +33,8 @@ export function setupIpcHandlers(): void {
           outputCostPer1mTokens: model.outputCostPer1mTokens,
         })),
       };
+      logger.debug('Token validation successful', { provider, modelCount: models.length });
+      return result;
     } catch (error) {
       logger.error('Token validation failed:', error);
       return {
@@ -87,12 +95,14 @@ export function setupIpcHandlers(): void {
       apiToken: string,
       modelId: string
     ): Promise<NewspaperPage> => {
+      logger.trace('IPC: newspaper:getPage called', { pageNum, childAge, childCountry, provider, modelId });
       try {
         logger.info(`Generating newspaper page ${pageNum} for ${childCountry}`);
 
         const llmProvider = LLMFactory.createProvider(provider as SupportedProvider, apiToken);
         const contentService = new ContentGenerationService(llmProvider, modelId);
 
+        logger.debug('Starting content generation', { childAge, childCountry, storiesPerPage: 4 });
         const pages = await contentService.generateNewspaperContent({
           childAge,
           childCountry,
@@ -103,6 +113,7 @@ export function setupIpcHandlers(): void {
           throw new Error(`Page ${pageNum} out of range`);
         }
 
+        logger.debug('Page generated successfully', { pageNum, totalPages: pages.length, storyCount: pages[pageNum - 1].stories.length });
         return pages[pageNum - 1];
       } catch (error) {
         logger.error('Generate page failed:', error);

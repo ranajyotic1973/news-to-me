@@ -40,7 +40,15 @@ export class ApiService {
     const channel = this.endpointToIpcChannel(endpoint);
     const args = data ? Object.values(data) : [];
 
-    return await ipcRenderer.invoke(channel, ...args);
+    console.log(`[ApiService] IPC Call: ${channel}`, data || {});
+    try {
+      const result = await ipcRenderer.invoke(channel, ...args);
+      console.log(`[ApiService] IPC Result: ${channel}`, result);
+      return result;
+    } catch (error) {
+      console.error(`[ApiService] IPC Error: ${channel}`, error);
+      throw error;
+    }
   }
 
   private static async httpCall<T>(

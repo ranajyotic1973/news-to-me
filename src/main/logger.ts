@@ -57,12 +57,43 @@ export class AppLogger {
     this.writeLog('WARN', message, data);
   }
 
+  debug(message: string, data?: any): void {
+    this.writeLog('DEBUG', message, data);
+  }
+
+  trace(message: string, data?: any): void {
+    this.writeLog('TRACE', message, data);
+  }
+
   getLogFile(): string {
     return this.logFile;
   }
 
   getLogDir(): string {
     return this.logDir;
+  }
+
+  cleanupLogs(): void {
+    try {
+      if (fs.existsSync(this.logDir)) {
+        const files = fs.readdirSync(this.logDir);
+        let deletedCount = 0;
+
+        for (const file of files) {
+          const filePath = path.join(this.logDir, file);
+          try {
+            fs.unlinkSync(filePath);
+            deletedCount++;
+          } catch (error) {
+            console.error(`Failed to delete log file ${file}:`, error);
+          }
+        }
+
+        this.info(`Cleaned up ${deletedCount} log files on shutdown`);
+      }
+    } catch (error) {
+      console.error('Error during log cleanup:', error);
+    }
   }
 }
 

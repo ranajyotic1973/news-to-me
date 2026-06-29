@@ -10,6 +10,9 @@ const isDev = !app.isPackaged;
 let mainWindow: BrowserWindow | null = null;
 
 const createWindow = async (): Promise<void> => {
+  logger.info('Creating BrowserWindow');
+  logger.debug('isDev', { isDev });
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -24,11 +27,21 @@ const createWindow = async (): Promise<void> => {
     },
   });
 
+  logger.info('BrowserWindow created successfully');
+
   const startUrl = isDev
     ? 'http://localhost:5173'
     : `file://${path.join(__dirname, '../../dist/index.html')}`;
 
-  await mainWindow.loadURL(startUrl);
+  logger.info('Loading URL', { startUrl, isDev });
+
+  try {
+    await mainWindow.loadURL(startUrl);
+    logger.info('URL loaded successfully');
+  } catch (error) {
+    logger.error('Failed to load URL', error);
+    throw error;
+  }
 
   if (isDev) {
     mainWindow.webContents.openDevTools();
@@ -40,8 +53,11 @@ const createWindow = async (): Promise<void> => {
   }
 
   mainWindow.on('closed', () => {
+    logger.info('Window closed');
     mainWindow = null;
   });
+
+  logger.info('Window ready and displayed');
 };
 
 const createMenu = (): void => {
@@ -109,19 +125,36 @@ const createMenu = (): void => {
 };
 
 app.on('ready', async () => {
+  logger.info('====================================');
   logger.info('Application starting...');
+  logger.info('App Name: News To Me');
+  logger.info('Version: ' + app.getVersion());
+  logger.info('Electron Version: ' + process.versions.electron);
+  logger.info('Node Version: ' + process.versions.node);
+  logger.info('Platform: ' + process.platform);
+  logger.info('App Path: ' + app.getAppPath());
+  logger.info('User Data Path: ' + app.getPath('userData'));
+  logger.info('isDev: ' + isDev);
+  logger.info('isPackaged: ' + app.isPackaged);
+  logger.info('====================================');
+
   createMenu();
+  logger.info('Menu created');
 
   try {
-    // Setup IPC handlers for backend logic
+    logger.info('Setting up IPC handlers...');
     setupIpcHandlers();
-    setupIPC();
+    logger.info('IPC handlers setup complete');
 
-    // Create Electron window
+    logger.info('Setting up IPC...');
+    setupIPC();
+    logger.info('IPC setup complete');
+
+    logger.info('Creating window...');
     await createWindow();
-    logger.info('Application started successfully');
+    logger.info('✓ Application started successfully');
   } catch (error) {
-    logger.error('Failed to start application:', error);
+    logger.error('✗ Failed to start application', error);
     const errorMessage = 'Failed to start News To Me';
     const detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
 
@@ -131,12 +164,14 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
+  logger.info('All windows closed');
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('activate', async () => {
+  logger.info('App activated');
   if (mainWindow === null) {
     await createWindow();
   }
@@ -144,4 +179,6 @@ app.on('activate', async () => {
 
 app.on('before-quit', () => {
   logger.info('Application closing...');
+  logger.info('====================================');
+  logger.cleanupLogs();
 });
