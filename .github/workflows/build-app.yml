@@ -103,9 +103,9 @@ jobs:
       - name: Filter installers only
         run: |
           mkdir -p release-files
-          find news-to-me-windows -maxdepth 1 \( -name "*.exe" -o -name "*.blockmap" \) -exec cp {} release-files/ \;
-          find news-to-me-macos -maxdepth 1 \( -name "*.dmg" -o -name "*.zip" -o -name "*.blockmap" \) -exec cp {} release-files/ \;
-          find news-to-me-linux -maxdepth 1 \( -name "*.AppImage" -o -name "*.deb" -o -name "*.blockmap" \) -exec cp {} release-files/ \;
+          find news-to-me-windows -maxdepth 1 -name "*.exe" -exec cp {} release-files/ \;
+          find news-to-me-macos -maxdepth 1 \( -name "*.dmg" -o -name "*.zip" \) -exec cp {} release-files/ \;
+          find news-to-me-linux -maxdepth 1 \( -name "*.AppImage" -o -name "*.deb" \) -exec cp {} release-files/ \;
         shell: bash
 
       - name: Create Release
