@@ -43,13 +43,16 @@ const createWindow = async (): Promise<void> => {
     throw error;
   }
 
+  // Enable DevTools in both dev and production for debugging
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+      mainWindow?.webContents.toggleDevTools();
+    }
+  });
+
+  // Auto-open DevTools in dev mode only
   if (isDev) {
     mainWindow.webContents.openDevTools();
-    mainWindow.webContents.on('before-input-event', (event, input) => {
-      if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-        mainWindow?.webContents.toggleDevTools();
-      }
-    });
   }
 
   mainWindow.on('closed', () => {
