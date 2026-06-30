@@ -110,7 +110,7 @@ app.on('ready', async () => {
   } catch (error) {
     logger.error('✗ Failed to start application', error);
     const errorMessage = 'Failed to start News To Me';
-    const detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDir();
+    const detailedMessage = (error instanceof Error ? error.message : String(error)) + '\n\nLogs: ' + logger.getLogDirectory();
 
     dialog.showErrorBox(errorMessage, detailedMessage);
     app.quit();

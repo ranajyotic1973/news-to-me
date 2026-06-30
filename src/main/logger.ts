@@ -4,15 +4,35 @@ import os from 'os';
 import { app } from 'electron';
 
 export class AppLogger {
-  private logDir: string;
-  private logFile: string;
+  private logDir: string | null = null;
+  private logFile: string | null = null;
 
   constructor() {
-    const appDataDir = app.getPath('userData');
-    this.logDir = path.join(appDataDir, 'logs');
-    this.logFile = path.join(this.logDir, `app-${new Date().toISOString().split('T')[0]}.log`);
+    // Defer initialization until paths are actually needed
+    // app.getPath() fails before app is ready
+  }
 
-    this.ensureLogDirectory();
+  private getLogDir(): string {
+    if (!this.logDir) {
+      try {
+        const appDataDir = app.getPath('userData');
+        this.logDir = path.join(appDataDir, 'logs');
+        this.ensureLogDirectory();
+      } catch (error) {
+        // Fallback if app isn't ready yet
+        this.logDir = path.join(os.homedir(), '.news-to-me', 'logs');
+        this.ensureLogDirectory();
+      }
+    }
+    return this.logDir;
+  }
+
+  private getLogFile(): string {
+    if (!this.logFile) {
+      const logDir = this.getLogDir();
+      this.logFile = path.join(logDir, `app-${new Date().toISOString().split('T')[0]}.log`);
+    }
+    return this.logFile;
   }
 
   private ensureLogDirectory(): void {
@@ -36,7 +56,8 @@ export class AppLogger {
     console.log(logMessage);
 
     try {
-      fs.appendFileSync(this.logFile, logMessage + '\n');
+      const logFile = this.getLogFile();
+      fs.appendFileSync(logFile, logMessage + '\n');
     } catch (error) {
       console.error('Failed to write to log file:', error);
     }
@@ -65,12 +86,12 @@ export class AppLogger {
     this.writeLog('TRACE', message, data);
   }
 
-  getLogFile(): string {
-    return this.logFile;
+  getLogFilePath(): string {
+    return this.getLogFile();
   }
 
-  getLogDir(): string {
-    return this.logDir;
+  getLogDirectory(): string {
+    return this.getLogDir();
   }
 
   cleanupLogs(): void {
