@@ -67,6 +67,15 @@ const createMenu = (): void => {
 };
 
 app.on('ready', async () => {
+  // Clean up old logs at startup (non-blocking)
+  setImmediate(() => {
+    try {
+      logger.cleanupLogs();
+    } catch (error) {
+      // Silently ignore cleanup errors
+    }
+  });
+
   logger.info('====================================');
   logger.info('Application starting...');
   logger.info('App Name: News To Me');
@@ -121,16 +130,11 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-  console.log('[Main] All windows closed');
+  console.log('[Main] All windows closed, exiting...');
   if (process.platform !== 'darwin') {
-    app.quit();
+    // Exit immediately on Windows/Linux (not macOS where apps stay open)
+    setTimeout(() => process.exit(0), 100);
   }
-
-  // Force exit after 2 seconds if app doesn't quit cleanly
-  setTimeout(() => {
-    console.log('[Main] Force exiting due to timeout');
-    process.exit(0);
-  }, 2000);
 });
 
 app.on('activate', async () => {
@@ -141,14 +145,11 @@ app.on('activate', async () => {
 });
 
 app.on('before-quit', () => {
-  console.log('[Main] App closing, cleaning up...');
   try {
     globalShortcut.unregisterAll();
+    // Don't call logger.cleanupLogs() - it can block shutdown
+    // Logs will be cleaned up next time app starts
   } catch (error) {
-    console.error('[Main] Error unregistering shortcuts:', error);
+    // Silently ignore errors during shutdown
   }
-
-  // Clean up logs silently (don't log during shutdown)
-  logger.cleanupLogs();
-  console.log('[Main] Cleanup complete');
 });
