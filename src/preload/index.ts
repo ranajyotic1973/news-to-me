@@ -4,7 +4,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 console.log('[Preload] Initializing preload script');
 
 interface ElectronAPI {
-  invoke: (channel: string, args?: any) => Promise<any>;
+  invoke: (channel: string, ...args: any[]) => Promise<any>;
   on: (channel: string, listener: (...args: any[]) => void) => void;
   off: (channel: string, listener: (...args: any[]) => void) => void;
   serverReady: () => Promise<boolean>;
@@ -14,7 +14,7 @@ interface ElectronAPI {
 }
 
 const api: ElectronAPI = {
-  invoke: (channel: string, args?: any) => ipcRenderer.invoke(channel, args),
+  invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
 
   on: (channel: string, listener: (...args: any[]) => void) => {
     ipcRenderer.on(channel, (_, ...args) => listener(...args));
