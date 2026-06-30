@@ -121,10 +121,16 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-  logger.info('All windows closed');
+  console.log('[Main] All windows closed');
   if (process.platform !== 'darwin') {
     app.quit();
   }
+
+  // Force exit after 2 seconds if app doesn't quit cleanly
+  setTimeout(() => {
+    console.log('[Main] Force exiting due to timeout');
+    process.exit(0);
+  }, 2000);
 });
 
 app.on('activate', async () => {
@@ -135,9 +141,14 @@ app.on('activate', async () => {
 });
 
 app.on('before-quit', () => {
-  logger.info('Application closing...');
-  globalShortcut.unregisterAll();
-  logger.info('Global shortcuts unregistered');
-  logger.info('====================================');
+  console.log('[Main] App closing, cleaning up...');
+  try {
+    globalShortcut.unregisterAll();
+  } catch (error) {
+    console.error('[Main] Error unregistering shortcuts:', error);
+  }
+
+  // Clean up logs silently (don't log during shutdown)
   logger.cleanupLogs();
+  console.log('[Main] Cleanup complete');
 });

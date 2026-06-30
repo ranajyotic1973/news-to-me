@@ -96,6 +96,8 @@ export class AppLogger {
 
   cleanupLogs(): void {
     try {
+      if (!this.logDir) return; // Not initialized yet
+
       if (fs.existsSync(this.logDir)) {
         const files = fs.readdirSync(this.logDir);
         let deletedCount = 0;
@@ -106,14 +108,16 @@ export class AppLogger {
             fs.unlinkSync(filePath);
             deletedCount++;
           } catch (error) {
-            console.error(`Failed to delete log file ${file}:`, error);
+            // Silently ignore cleanup errors during shutdown
           }
         }
 
-        this.info(`Cleaned up ${deletedCount} log files on shutdown`);
+        // Don't log during cleanup - just silently clean up
+        console.log(`[Logger] Cleaned up ${deletedCount} log files on shutdown`);
       }
     } catch (error) {
-      console.error('Error during log cleanup:', error);
+      // Silently ignore any errors during cleanup
+      console.error('[Logger] Error during cleanup:', error);
     }
   }
 }
