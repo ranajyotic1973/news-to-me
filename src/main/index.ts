@@ -4,14 +4,14 @@ import { setupIPC } from './ipc';
 import { setupIpcHandlers } from './ipcHandlers';
 import { logger } from './logger';
 
-// Check if running in development mode (no external dependency)
-const isDev = !app.isPackaged;
-
 let mainWindow: BrowserWindow | null = null;
+
+// Determine if running in development (deferred - app may not be ready at module load)
+const isDev = (): boolean => !app.isPackaged;
 
 const createWindow = async (): Promise<void> => {
   logger.info('Creating BrowserWindow');
-  logger.debug('isDev', { isDev });
+  logger.debug('isDev', { isDev: isDev() });
 
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -29,7 +29,7 @@ const createWindow = async (): Promise<void> => {
 
   logger.info('BrowserWindow created successfully');
 
-  const startUrl = isDev
+  const startUrl = isDev()
     ? 'http://localhost:5173'
     : `file://${path.join(__dirname, '../../dist/index.html')}`;
 
@@ -44,7 +44,7 @@ const createWindow = async (): Promise<void> => {
   }
 
   // Auto-open DevTools in dev mode only
-  if (isDev) {
+  if (isDev()) {
     mainWindow.webContents.openDevTools();
     logger.info('DevTools auto-opened in dev mode');
   }
