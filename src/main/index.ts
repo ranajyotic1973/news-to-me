@@ -46,11 +46,7 @@ const createWindow = async (): Promise<void> => {
     throw error;
   }
 
-  // Auto-open DevTools in dev mode only
-  if (isDev()) {
-    mainWindow.webContents.openDevTools();
-    logger.info('DevTools auto-opened in dev mode');
-  }
+  // DevTools can be opened with F12 or Ctrl+Shift+I if needed
 
   mainWindow.on('closed', () => {
     logger.info('Window closed');

@@ -87,6 +87,12 @@ tests/
 4. **Message Chaining**: Pass structured AI responses (as JSON or typed objects) between agents.
 5. **Token Efficiency**: Favor local tooling over API calls; use RAG to provide context without embedding entire datasets.
 
+## Github rules
+- Do not commit unless user tells
+- Do not push any code unless user tells
+- Do not tag any commit unless user tells
+- Once tagging is done, delete artifacts of all older releases and the releases themseleves using github CLI
+
 ## References
 
 Refer to this CLAUDE.md and the provided coding rules when making architectural decisions or writing new modules.
