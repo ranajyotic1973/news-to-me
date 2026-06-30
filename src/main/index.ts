@@ -85,7 +85,7 @@ app.on('ready', async () => {
   logger.info('Platform: ' + process.platform);
   logger.info('App Path: ' + app.getAppPath());
   logger.info('User Data Path: ' + app.getPath('userData'));
-  logger.info('isDev: ' + isDev);
+  logger.info('isDev: ' + isDev());
   logger.info('isPackaged: ' + app.isPackaged);
   logger.info('====================================');
 
@@ -130,10 +130,9 @@ app.on('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
-  console.log('[Main] All windows closed, exiting...');
+  logger.info('All windows closed');
   if (process.platform !== 'darwin') {
-    // Exit immediately on Windows/Linux (not macOS where apps stay open)
-    setTimeout(() => process.exit(0), 100);
+    app.quit();
   }
 });
 
@@ -147,9 +146,23 @@ app.on('activate', async () => {
 app.on('before-quit', () => {
   try {
     globalShortcut.unregisterAll();
-    // Don't call logger.cleanupLogs() - it can block shutdown
-    // Logs will be cleaned up next time app starts
   } catch (error) {
-    // Silently ignore errors during shutdown
+    // Silently ignore
   }
+
+  // Close the window if still open
+  if (mainWindow) {
+    try {
+      mainWindow.destroy();
+    } catch (error) {
+      // Silently ignore
+    }
+    mainWindow = null;
+  }
+});
+
+// Force process exit when app quits
+app.on('quit', () => {
+  // Exit immediately to prevent hanging
+  process.exit(0);
 });
