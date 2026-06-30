@@ -1,5 +1,9 @@
-// Import Electron IPC for desktop app communication
-const { ipcRenderer } = window.require('electron');
+// Import Electron IPC for desktop app communication via preload bridge
+declare global {
+  interface Window {
+    electron?: { api: any };
+  }
+}
 
 export interface ApiError {
   message: string;
@@ -9,8 +13,8 @@ export interface ApiError {
 export class ApiService {
   static async get<T>(endpoint: string, params?: Record<string, string | number>): Promise<T> {
     try {
-      // Use IPC for backend communication in Electron
-      if (ipcRenderer) {
+      // Use IPC for backend communication in Electron (via preload bridge)
+      if (window.electron?.api) {
         return await this.ipcCall<T>(endpoint, params);
       }
       // Fallback to HTTP for web dev server
@@ -42,7 +46,10 @@ export class ApiService {
 
     console.log(`[ApiService] IPC Call: ${channel}`, data || {});
     try {
-      const result = await ipcRenderer.invoke(channel, ...args);
+      if (!window.electron?.api) {
+        throw new Error('Electron API not available');
+      }
+      const result = await window.electron.api.invoke(channel, ...args);
       console.log(`[ApiService] IPC Result: ${channel}`, result);
       return result;
     } catch (error) {
