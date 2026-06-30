@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { logger } from './logger';
 import { ContentGenerationService } from '../backend/services/ContentGenerationService';
+import { MeaningService } from '../backend/services/MeaningService';
 import { LLMFactory, SupportedProvider } from '../backend/services/llm/LLMFactory';
 import { NewspaperPage } from '../backend/services/StoryFormattingService';
 
@@ -151,6 +152,33 @@ export function setupIpcHandlers(): void {
           success: false,
           message: error instanceof Error ? error.message : 'Unknown error',
         };
+      }
+    }
+  );
+
+  // Meaning: Get meaning of selected text
+  ipcMain.handle(
+    'meaning:getMeaning',
+    async (
+      _event,
+      selectedText: string,
+      provider: string,
+      apiToken: string,
+      modelId: string
+    ) => {
+      logger.trace('IPC: meaning:getMeaning called', { selectedText, provider, modelId });
+      try {
+        logger.info(`Getting meaning for: "${selectedText}"`);
+
+        const llmProvider = LLMFactory.createProvider(provider as SupportedProvider, apiToken);
+        const meaningService = new MeaningService(llmProvider, modelId);
+
+        const result = await meaningService.getMeaning(selectedText);
+        logger.debug('Meaning retrieved successfully', { text: selectedText });
+        return result;
+      } catch (error) {
+        logger.error('Get meaning failed:', error);
+        throw error;
       }
     }
   );

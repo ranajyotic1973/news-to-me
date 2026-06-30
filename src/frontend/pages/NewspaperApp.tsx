@@ -3,6 +3,9 @@ import { ConfigurationService } from '../services/ConfigurationService';
 import { NewspaperApi, NewspaperPageResponse, NewsStory } from '../services/ApiService';
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
+import { useTextSelection } from '../hooks/useTextSelection';
+import { SelectionPopup } from '../components/SelectionPopup';
+import { MeaningPopup } from '../components/MeaningPopup';
 import NewspaperPage from '../components/NewspaperPage';
 import OnboardingScreen from './OnboardingScreen';
 
@@ -18,6 +21,11 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
   const [error, setError] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Meaning feature
+  const { selection, clearSelection } = useTextSelection();
+  const [meaning, setMeaning] = useState<string | null>(null);
+  const [meaningLoading, setMeaningLoading] = useState(false);
 
   const loadPage = async (pageNum: number): Promise<void> => {
     setLoading(true);
@@ -106,6 +114,33 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
     return stories.filter((story) => story.category === selectedCategory);
   };
 
+  const handleGetMeaning = async (selectedText: string): Promise<void> => {
+    setMeaningLoading(true);
+    try {
+      const config = ConfigurationService.loadConfiguration();
+      if (!config) {
+        throw new Error('Configuration not found');
+      }
+
+      console.log('[NewspaperApp] Requesting meaning for:', selectedText);
+
+      const response = await window.electron?.api?.invoke('meaning:getMeaning', {
+        selectedText,
+        provider: config.llmConfig.provider,
+        apiToken: config.llmConfig.apiToken,
+        modelId: config.llmConfig.selectedModel,
+      });
+
+      console.log('[NewspaperApp] Received meaning response:', response);
+      setMeaning(response.meaning);
+    } catch (err) {
+      console.error('[NewspaperApp] Failed to get meaning:', err);
+      setMeaning('Unable to get meaning. Please try again.');
+    } finally {
+      setMeaningLoading(false);
+    }
+  };
+
   if (showSettings) {
     return (
       <OnboardingScreen onConfigurationComplete={handleSettingsSaved} />
@@ -168,6 +203,29 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
         currentTopic={selectedCategory}
         onTopicChange={handleCategoryChange}
       />
+
+      {/* Selection popup for getting meaning */}
+      {selection && !meaning && (
+        <SelectionPopup
+          selectedText={selection.text}
+          position={selection.position}
+          onMeaningClick={handleGetMeaning}
+          isLoading={meaningLoading}
+        />
+      )}
+
+      {/* Meaning popup displaying LLM response */}
+      {meaning && selection && (
+        <MeaningPopup
+          selectedText={selection.text}
+          meaning={meaning}
+          position={selection.position}
+          onClose={() => {
+            setMeaning(null);
+            clearSelection();
+          }}
+        />
+      )}
     </div>
   );
 }
