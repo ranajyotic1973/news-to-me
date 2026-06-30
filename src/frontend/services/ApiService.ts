@@ -1,9 +1,5 @@
-// Import Electron IPC for desktop app communication via preload bridge
-declare global {
-  interface Window {
-    electron?: { api: any };
-  }
-}
+// Electron IPC for desktop app communication via preload bridge
+// (declared in preload/index.ts)
 
 export interface ApiError {
   message: string;
@@ -28,7 +24,8 @@ export class ApiService {
 
   static async post<T>(endpoint: string, data: unknown): Promise<T> {
     try {
-      if (ipcRenderer) {
+      // Use IPC for backend communication in Electron (via preload bridge)
+      if (window.electron?.api) {
         return await this.ipcCall<T>(endpoint, data as Record<string, unknown>);
       }
       return await this.httpCall<T>(endpoint, undefined, data);
