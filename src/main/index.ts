@@ -1,10 +1,13 @@
-import { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut } from 'electron';
+// MUST be first - require electron before anything else
+const electronModule = require('electron');
+const { app, BrowserWindow: BrowserWindowClass, Menu, ipcMain, dialog, globalShortcut } = electronModule;
+
 import path from 'path';
 import { setupIPC } from './ipc';
 import { setupIpcHandlers } from './ipcHandlers';
 import { logger } from './logger';
 
-let mainWindow: BrowserWindow | null = null;
+let mainWindow: any = null;
 
 // Determine if running in development (deferred - app may not be ready at module load)
 const isDev = (): boolean => !app.isPackaged;
@@ -13,7 +16,7 @@ const createWindow = async (): Promise<void> => {
   logger.info('Creating BrowserWindow');
   logger.debug('isDev', { isDev: isDev() });
 
-  mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindowClass({
     width: 1200,
     height: 800,
     minWidth: 800,
