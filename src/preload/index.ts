@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+// Log preload script initialization
+console.log('[Preload] Initializing preload script');
+
 interface ElectronAPI {
   invoke: (channel: string, args?: any) => Promise<any>;
   on: (channel: string, listener: (...args: any[]) => void) => void;
@@ -32,6 +35,8 @@ const api: ElectronAPI = {
 };
 
 contextBridge.exposeInMainWorld('electron', { api });
+
+console.log('[Preload] API exposed to renderer');
 
 declare global {
   interface Window {
