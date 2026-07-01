@@ -165,6 +165,7 @@ export class NewspaperApi {
     modelId: string
   ): Promise<NewspaperPageResponse> {
     return ApiService.get<NewspaperPageResponse>(`/api/newspaper/page/${pageNum}`, {
+      pageNum,
       childAge,
       childCountry,
       provider,
@@ -180,10 +181,10 @@ export class NewspaperApi {
     modelId: string
   ): Promise<{ success: boolean; message: string }> {
     return ApiService.get<{ success: boolean; message: string }>('/api/newspaper/regenerate', {
-      childCountry,
       provider,
       apiToken,
       modelId,
+      childCountry,
     });
   }
 }
