@@ -9,6 +9,7 @@
     "dist/**/*",
     "dist-electron/**/*",
     "dist/backend/**/*",
+    "build/**/*",
     "node_modules/**/*",
     "package.json"
   ],

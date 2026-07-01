@@ -16,12 +16,23 @@ const createWindow = async (): Promise<void> => {
   logger.info('Creating BrowserWindow');
   logger.debug('isDev', { isDev: isDev() });
 
+  // Resolve icon path for both dev and packaged modes
+  let iconPath: string;
+  if (isDev()) {
+    // Dev mode: icon is at ../../build/icon.png relative to dist-electron/main/
+    iconPath = path.join(__dirname, '../../build/icon.png');
+  } else {
+    // Packaged mode: icon is at ../../../build/icon.png relative to dist-electron/main/
+    // (goes up to resources, then to build)
+    iconPath = path.join(__dirname, '../../../build/icon.png');
+  }
+
   mainWindow = new BrowserWindowClass({
     width: 1200,
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    icon: path.join(__dirname, '../../build/icon.png'),
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
