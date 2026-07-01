@@ -36,6 +36,8 @@ export class StoryFormattingService {
     const stories: NewsStory[] = [];
     const storyBlocks = content.split(/(?=- Headline:)/);
 
+    console.log(`[StoryFormattingService] Parsing ${storyBlocks.length} blocks`);
+
     for (const block of storyBlocks) {
       if (!block.trim()) continue;
 
@@ -49,12 +51,16 @@ export class StoryFormattingService {
         const headline = headlineMatch[1].trim();
         const imageDescription = imageMatch ? imageMatch[1].trim() : '';
 
+        console.log(`[StoryFormattingService] Story: "${headline}", Image description: "${imageDescription}"`);
+
         // Remove [IMAGE:...] tags from summary if they exist
         summary = summary.replace(/\s*\[IMAGE:[^\]]*\]\s*/g, '');
 
         // Generate image URL based on image description or headline
         const imageQuery = StoryFormattingService.extractImageQuery(headline, imageDescription);
         const imageUrl = StoryFormattingService.generateImageSearchUrl(imageQuery);
+
+        console.log(`[StoryFormattingService] Generated image URL: ${imageUrl}`);
 
         stories.push({
           id: `story-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -66,6 +72,7 @@ export class StoryFormattingService {
       }
     }
 
+    console.log(`[StoryFormattingService] Parsed ${stories.length} stories`);
     return stories;
   }
 

@@ -168,31 +168,33 @@ function NewspaperApp({ onReset }: NewspaperAppProps): JSX.Element {
 
   return (
     <div className="newspaper-app">
-      <div style={{ position: 'fixed', top: '15px', right: '15px', zIndex: '100' }}>
-        <button
-          onClick={handleOpenSettings}
-          title="Settings - Change LLM provider or API key"
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: '0',
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            color: '#333',
-            transition: 'transform 0.2s ease, opacity 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.2) rotate(15deg)';
-            e.currentTarget.style.opacity = '0.7';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.opacity = '1';
-          }}
-        >
-          <i className="fas fa-cog"></i>
-        </button>
-      </div>
+      <button
+        onClick={handleOpenSettings}
+        title="Settings - Change LLM provider or API key"
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          background: 'none',
+          border: 'none',
+          padding: '8px',
+          cursor: 'pointer',
+          fontSize: '1.2rem',
+          color: '#333',
+          transition: 'transform 0.2s ease, opacity 0.2s ease',
+          zIndex: 101,
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.2) rotate(15deg)';
+          e.currentTarget.style.opacity = '0.7';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.opacity = '1';
+        }}
+      >
+        <i className="fas fa-cog"></i>
+      </button>
       <NewspaperPage
         pageNumber={currentPage}
         totalPages={totalPages}
