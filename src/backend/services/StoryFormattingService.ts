@@ -48,6 +48,11 @@ export class StoryFormattingService {
           // Encode SVG as data URL for inline display
           const encodedSvg = encodeURIComponent(svgContent);
           imageUrl = `data:image/svg+xml,${encodedSvg}`;
+        } else {
+          // Log if SVG was not found in block
+          if (block.includes('SVGImage')) {
+            console.error(`[StoryFormattingService] SVG not parsed for: ${headline}`);
+          }
         }
 
         stories.push({
