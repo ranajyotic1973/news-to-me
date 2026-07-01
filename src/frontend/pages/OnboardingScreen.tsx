@@ -67,24 +67,51 @@ function OnboardingScreen({ onComplete, onConfigurationComplete }: OnboardingScr
     setError('');
 
     try {
+      // 1. Save child profile first (if not already saved)
+      if (childProfile.name && childProfile.age && childProfile.country) {
+        ConfigurationService.saveChildProfile(childProfile as ChildProfile);
+      }
+
+      // 2. Validate token first to ensure it's correct
+      console.log('[OnboardingScreen] Validating token for', config.provider);
       const { ConfigApi } = await import('../services/ApiService');
-      const configData = await ConfigApi.listModels(config.provider, config.apiToken);
+      const tokenValidation = await ConfigApi.validateToken(config.provider, config.apiToken);
 
-      // Store all models and set default to cheapest
-      const models = configData.models || [];
-      console.log('Available models:', models);
-      setAvailableModels(models);
+      if (!tokenValidation.valid) {
+        throw new Error(tokenValidation.error || 'Invalid API token');
+      }
 
-      setLLMConfig({
+      console.log('[OnboardingScreen] Token validated successfully');
+
+      // 3. Save LLM config immediately so it's available for all subsequent calls
+      const tempLLMConfig: LLMConfig = {
         provider: config.provider as 'openai' | 'anthropic' | 'cohere' | 'xai' | 'gemini' | 'mock',
         apiToken: config.apiToken,
+        selectedModel: '', // Will be set after model selection
+      };
+
+      // Temporarily save to state for this flow
+      setLLMConfig(tempLLMConfig);
+
+      // 4. List available models
+      console.log('[OnboardingScreen] Listing models...');
+      const configData = await ConfigApi.listModels(config.provider, config.apiToken);
+
+      // Store all models and set default to recommended
+      const models = configData.models || [];
+      console.log('[OnboardingScreen] Available models:', models);
+      setAvailableModels(models);
+
+      // 5. Set recommended model and move to selection
+      setLLMConfig({
+        ...tempLLMConfig,
         selectedModel: configData.recommended.id,
       });
 
       setStep('model');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Model fetch error:', errorMessage);
+      console.error('[OnboardingScreen] Error:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
