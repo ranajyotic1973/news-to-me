@@ -13,30 +13,18 @@ export interface NewspaperPage {
 }
 
 export class StoryFormattingService {
-  static generateImageSearchUrl(query: string): string {
-    // Use Unsplash API with search query for relevant images
-    // Query is URL-encoded and used to search for images matching the story
-    const encodedQuery = encodeURIComponent(query.substring(0, 50)); // Limit query length
-    // Using Unsplash source which provides free stock images
-    return `https://source.unsplash.com/600x400/?${encodedQuery}`;
-  }
-
-  static extractImageQuery(headline: string, imageDescription: string): string {
-    // Create search query from headline and image description
-    // Use image description as primary, fallback to headline
-    if (imageDescription && imageDescription.toLowerCase() !== 'not available') {
-      return imageDescription;
+  static extractSVGFromText(text: string): string | null {
+    // Extract SVG content from text (e.g., "- SVGImage: <svg>...</svg>")
+    const svgMatch = text.match(/SVGImage:\s*(<svg[^<]*(?:<[^>]*>)*<\/svg>)/i);
+    if (svgMatch && svgMatch[1]) {
+      return svgMatch[1];
     }
-
-    // Fallback: extract key terms from headline
-    return headline.split(' ').slice(0, 3).join(' ');
+    return null;
   }
 
   static parseGeneratedContent(content: string): NewsStory[] {
     const stories: NewsStory[] = [];
     const storyBlocks = content.split(/(?=- Headline:)/);
-
-    console.log(`[StoryFormattingService] Parsing ${storyBlocks.length} blocks`);
 
     for (const block of storyBlocks) {
       if (!block.trim()) continue;
@@ -44,23 +32,23 @@ export class StoryFormattingService {
       const headlineMatch = block.match(/- Headline:\s*(.+?)(?:\n|$)/);
       const summaryMatch = block.match(/- Summary:\s*(.+?)(?=- Category:|$)/s);
       const categoryMatch = block.match(/- Category:\s*(business|stock-market|sports|math)/i);
-      const imageMatch = block.match(/- Image:\s*(.+?)(?:\n|$)/);
+      const svgMatch = block.match(/- SVGImage:\s*(<svg[^<]*(?:<[^>]*>)*<\/svg>)/i);
 
       if (headlineMatch && summaryMatch && categoryMatch) {
         let summary = summaryMatch[1].trim();
         const headline = headlineMatch[1].trim();
-        const imageDescription = imageMatch ? imageMatch[1].trim() : '';
-
-        console.log(`[StoryFormattingService] Story: "${headline}", Image description: "${imageDescription}"`);
+        const svgContent = svgMatch ? svgMatch[1].trim() : '';
 
         // Remove [IMAGE:...] tags from summary if they exist
         summary = summary.replace(/\s*\[IMAGE:[^\]]*\]\s*/g, '');
 
-        // Generate image URL based on image description or headline
-        const imageQuery = StoryFormattingService.extractImageQuery(headline, imageDescription);
-        const imageUrl = StoryFormattingService.generateImageSearchUrl(imageQuery);
-
-        console.log(`[StoryFormattingService] Generated image URL: ${imageUrl}`);
+        // Use SVG content as data URL if available
+        let imageUrl: string | undefined;
+        if (svgContent) {
+          // Encode SVG as data URL for inline display
+          const encodedSvg = encodeURIComponent(svgContent);
+          imageUrl = `data:image/svg+xml,${encodedSvg}`;
+        }
 
         stories.push({
           id: `story-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -72,7 +60,6 @@ export class StoryFormattingService {
       }
     }
 
-    console.log(`[StoryFormattingService] Parsed ${stories.length} stories`);
     return stories;
   }
 
