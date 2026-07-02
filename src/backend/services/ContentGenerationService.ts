@@ -1,6 +1,7 @@
 import { ILLMProvider } from './llm/ILLMProvider';
 import { PromptBuilder, PromptContext } from './llm/PromptBuilder';
 import { StoryFormattingService, NewspaperPage } from './StoryFormattingService';
+import { StoryIllustrationService } from './StoryIllustrationService';
 import { NewspaperCacheService } from './NewspaperCacheService';
 import { NewsPortalFetchService } from './news/NewsPortalFetchService';
 
@@ -110,6 +111,16 @@ export class ContentGenerationService {
 
       if (!StoryFormattingService.validateStories(stories)) {
         throw new Error('Generated stories failed validation');
+      }
+
+      // Replace any model-drawn image with a clean, hand-designed illustration
+      // for the story's category, featuring a key figure from the story.
+      for (const story of stories) {
+        story.imageUrl = StoryIllustrationService.generate(
+          story.category,
+          story.headline,
+          story.summary
+        );
       }
 
       // Create a single page from generated stories (each page is a new batch of 4 stories)

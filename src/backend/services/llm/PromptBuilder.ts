@@ -167,9 +167,8 @@ For EACH story, provide:
 2. A 2-3 sentence summary, simplified for the child, with specific numbers, names, or scores
 3. The source portal name
 4. A category: business, stock-market, sports, or math
-5. One DETAILED SVG illustration (valid SVG code) that visually tells the story. Use viewBox="0 0 400 300" and compose a small scene, not a single icon: a contextual background, a clear focal subject representing the news, 2-3 supporting elements, and short text labels with REAL data from the story (numbers, tickers, scores, names). Use kid-friendly colors and gradients or subtle shading. Keep it self-contained and under 15KB. Do NOT output a plain colored box.
 
-RESPONSE FORMAT (Markdown with embedded SVG) — use today's date, ${today}, in the header exactly as shown:
+RESPONSE FORMAT (Markdown) — use today's date, ${today}, in the header exactly as shown:
 
 ## Top News - ${today}
 
@@ -182,16 +181,11 @@ RESPONSE FORMAT (Markdown with embedded SVG) — use today's date, ${today}, in 
 
 **Category:** [business, stock-market, sports, or math]
 
-\`\`\`svg
-[SVG code here]
-\`\`\`
-
 ---
 
 REQUIREMENTS:
 - Always return 3-5 stories. Never reply that no news is available.
 - Base stories on the fetched content when available; keep them accurate.
-- Each story MUST have a valid, detailed SVG illustration.
 - Make content engaging and age-appropriate for a ${context.childAge}-year-old.
 - Focus on ${context.childCountry} news plus relevant international stories.
 - DO NOT repeat stories from previous pages.`;

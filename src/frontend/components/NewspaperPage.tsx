@@ -117,14 +117,6 @@ function NewspaperPage({
                   src={story.imageUrl}
                   alt={story.headline}
                   className="story-image"
-                  style={{
-                    width: '100%',
-                    aspectRatio: '4 / 3',
-                    objectFit: 'contain',
-                    backgroundColor: '#f5f5f5',
-                    marginBottom: '10px',
-                    borderRadius: '4px',
-                  }}
                 />
               )}
               <div
