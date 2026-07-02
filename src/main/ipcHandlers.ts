@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { logger } from './logger';
 import { ContentGenerationService } from '../backend/services/ContentGenerationService';
 import { MeaningService } from '../backend/services/MeaningService';
+import { NewspaperCacheService } from '../backend/services/NewspaperCacheService';
 import { LLMFactory, SupportedProvider } from '../backend/services/llm/LLMFactory';
 import { NewspaperPage } from '../backend/services/StoryFormattingService';
 
@@ -103,19 +104,16 @@ export function setupIpcHandlers(): void {
         const llmProvider = LLMFactory.createProvider(provider as SupportedProvider, apiToken);
         const contentService = new ContentGenerationService(llmProvider, modelId);
 
-        logger.debug('Starting content generation', { childAge, childCountry, storiesPerPage: 4 });
-        const pages = await contentService.generateNewspaperContent({
+        logger.debug('Starting content generation', { childAge, childCountry, pageNum, storiesPerPage: 4 });
+        const page = await contentService.generateNewspaperContent({
           childAge,
           childCountry,
+          pageNum,
           storiesPerPage: 4,
         });
 
-        if (pageNum > pages.length || pageNum < 1) {
-          throw new Error(`Page ${pageNum} out of range`);
-        }
-
-        logger.debug('Page generated successfully', { pageNum, totalPages: pages.length, storyCount: pages[pageNum - 1].stories.length });
-        return pages[pageNum - 1];
+        logger.debug('Page generated successfully', { pageNum, storyCount: page.stories.length, totalPages: page.totalPages });
+        return page;
       } catch (error) {
         logger.error('Generate page failed:', error);
         throw error;
@@ -182,4 +180,16 @@ export function setupIpcHandlers(): void {
       }
     }
   );
+
+  // Newspaper: Clear cache (when settings change)
+  ipcMain.handle('newspaper:clearCache', async (_event, childAge?: number, childCountry?: string) => {
+    try {
+      logger.info('Clearing newspaper cache', { childAge, childCountry });
+      NewspaperCacheService.clearCache(childAge, childCountry);
+      return { success: true };
+    } catch (error) {
+      logger.error('Clear cache failed:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  });
 }

@@ -119,8 +119,9 @@ function NewspaperPage({
                   className="story-image"
                   style={{
                     width: '100%',
-                    height: '200px',
-                    objectFit: 'cover',
+                    aspectRatio: '4 / 3',
+                    objectFit: 'contain',
+                    backgroundColor: '#f5f5f5',
                     marginBottom: '10px',
                     borderRadius: '4px',
                   }}
@@ -143,7 +144,10 @@ function NewspaperPage({
       <div className="navigation-controls">
         <button
           className="icon-button"
-          onClick={onPreviousPage}
+          onClick={() => {
+            console.log('[NewspaperPage] Previous button clicked, pageNumber:', pageNumber);
+            onPreviousPage();
+          }}
           disabled={pageNumber === 1}
           title="Previous page"
         >
@@ -156,8 +160,11 @@ function NewspaperPage({
 
         <button
           className="icon-button"
-          onClick={onNextPage}
-          title="Next page"
+          onClick={() => {
+            console.log('[NewspaperPage] Next button clicked, pageNumber:', pageNumber, 'totalPages:', totalPages);
+            onNextPage();
+          }}
+          title="Next page - load more stories"
         >
           <i className="fas fa-chevron-right"></i>
         </button>

@@ -74,6 +74,10 @@ const createMenu = (): void => {
 };
 
 app.on('ready', async () => {
+  // Set the Windows Application User Model ID so the taskbar shows the app's
+  // own icon/identity (instead of the default Electron one) in dev and packaged.
+  app.setAppUserModelId('com.newstome.app');
+
   // Clean up old logs at startup (non-blocking)
   setImmediate(() => {
     try {

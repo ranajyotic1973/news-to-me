@@ -8,11 +8,11 @@
     "sync-version": "node scripts/sync-version.js",
     "dev": "npm run sync-version && concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
-    "dev:electron": "sleep 2 && electron . --remote-debugging-port=9223",
+    "dev:electron": "node scripts/dev-electron.js",
     "build": "npm run sync-version && npm run build:frontend && npm run build:backend && npm run build:electron",
     "build:frontend": "vite build",
     "build:backend": "tsc --listFiles false src/backend/index.ts --outDir dist/backend --module commonjs --target es2020 --esModuleInterop --resolveJsonModule --skipLibCheck true",
-    "build:electron": "tsc src/main/index.ts src/main/ipc.ts src/main/ipcHandlers.ts src/main/logger.ts src/preload/index.ts --outDir dist-electron --module commonjs --target es2020 --esModuleInterop --resolveJsonModule",
+    "build:electron": "tsc src/main/index.ts src/main/ipc.ts src/main/ipcHandlers.ts src/main/logger.ts src/preload/index.ts --outDir dist-electron --module commonjs --target es2020 --esModuleInterop --resolveJsonModule --skipLibCheck true",
     "build:web": "tsc && vite build",
     "build:app": "tsc && vite build",
     "preview": "vite preview",
@@ -40,6 +40,19 @@
   },
   "desktopName": "News To Me",
   "license": "ISC",
+  "build": {
+    "appId": "com.newstome.app",
+    "productName": "News To Me",
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icon.png"
+    }
+  },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.2.0",
     "axios": "^1.6.0",
@@ -66,7 +79,7 @@
     "@typescript-eslint/parser": "^6.10.0",
     "@vitejs/plugin-react": "^4.1.0",
     "concurrently": "^8.2.2",
-    "electron": "latest",
+    "electron": "^22.3.27",
     "electron-builder": "latest",
     "electron-is-dev": "latest",
     "eslint": "^8.53.0",

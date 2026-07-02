@@ -5,6 +5,7 @@ import {
   LLMGenerationParams,
   LLMGenerationResult,
 } from '../ILLMProvider';
+import { PromptTemplate } from '../PromptTemplate';
 
 export class OpenAIProvider implements ILLMProvider {
   private apiKey: string;
@@ -48,22 +49,11 @@ export class OpenAIProvider implements ILLMProvider {
     modelId: string,
     params: LLMGenerationParams
   ): Promise<LLMGenerationResult> {
-    const systemPrompt = `You are a news article generator for children aged 10-16.
-
-CRITICAL: For each story you generate, you MUST include ALL of these fields in EXACTLY this format:
-- Headline: [story headline]
-- Summary: [2-3 sentences]
-- Category: [business|stock-market|sports|math]
-- SVGImage: [simple SVG graphic representing the story]
-
-The SVGImage field is REQUIRED. Generate a simple, clear SVG graphic (200x200px viewBox) that visually represents the story topic.
-
-SVG Examples:
-Business story: <svg viewBox="0 0 200 200"><rect x="20" y="50" width="30" height="100" fill="#4CAF50"/><rect x="60" y="30" width="30" height="120" fill="#2196F3"/><rect x="100" y="70" width="30" height="80" fill="#FF9800"/><text x="50" y="180" font-size="12" text-anchor="middle">Growth Chart</text></svg>
-
-Sports story: <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="60" fill="none" stroke="#F44336" stroke-width="3"/><circle cx="80" cy="80" r="8" fill="#F44336"/><circle cx="120" cy="120" r="8" fill="#F44336"/><text x="100" y="180" font-size="12" text-anchor="middle">Cricket Match</text></svg>
-
-Do NOT skip the SVGImage field. Do NOT use external image URLs. Every story MUST have an SVG graphic.`;
+    const childAge = params.childAge?.toString() || '10-16';
+    const childCountry = params.childCountry || 'Global';
+    const systemPrompt = PromptTemplate.getSystemPromptString(
+      PromptTemplate.buildNewsWithSVGPrompt(childAge, childCountry)
+    );
 
     const response = await axios.post(
       `${this.baseUrl}/chat/completions`,

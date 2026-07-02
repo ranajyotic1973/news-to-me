@@ -39,22 +39,22 @@ router.get('/page/:pageNum', async (req: Request, res: Response) => {
       // Generate stories for this page
       const storiesPerPage = 4;
 
-      const pageContent = await contentService.generateNewspaperContent({
+      const page = await contentService.generateNewspaperContent({
         childAge: parseInt(childAge as string, 10),
         childCountry: childCountry as string,
         stockMarketIndex: marketData?.primaryIndex,
         currency: marketData?.currency,
+        pageNum: pageNum,
         storiesPerPage: storiesPerPage,
       });
 
-      if (!pageContent || pageContent.length === 0) {
+      if (!page || !page.stories || page.stories.length === 0) {
         return res.status(404).json({ error: 'No newspaper content available' });
       }
 
-      const page = pageContent[0];
       return res.json({
-        pageNumber: pageNum,
-        totalPages: 999, // Unlimited pages
+        pageNumber: page.pageNumber,
+        totalPages: page.totalPages,
         stories: page.stories,
       });
     } catch (error) {

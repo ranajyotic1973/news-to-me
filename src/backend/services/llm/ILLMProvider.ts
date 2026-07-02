@@ -10,6 +10,8 @@ export interface LLMGenerationParams {
   maxTokens?: number;
   temperature?: number;
   topP?: number;
+  childAge?: number;
+  childCountry?: string;
 }
 
 export interface LLMGenerationResult {
